@@ -58,12 +58,12 @@ class XboxArtwork(unittest.TestCase):
         self.assertEqual(png_info(ASSETS / 'SplashScreen.png'), (620, 300))
 
     def test_package_indexes_assets_before_packing(self):
-        script = (ROOT / 'xbox/scripts/package.ps1').read_text()
+        script = (ROOT / 'xbox/scripts/package.ps1').read_text(encoding='utf-8')
         self.assertLess(script.index('makepri.exe" new'), script.index('makeappx.exe" pack'))
         self.assertIn("SelectNodes('/resources/packaging')", script)
         self.assertIn("'resources.pri'", script)
         self.assertIn('/mn $manifest', script)
-        copy_script = (ROOT / 'xbox/scripts/assets.ps1').read_text()
+        copy_script = (ROOT / 'xbox/scripts/assets.ps1').read_text(encoding='utf-8')
         self.assertNotIn('DrawString', copy_script)
         self.assertNotIn('CoverSource', copy_script)
         for name in ('Square310x310Logo', 'Wide310x150Logo', '.scale-200', '.scale-400'):
