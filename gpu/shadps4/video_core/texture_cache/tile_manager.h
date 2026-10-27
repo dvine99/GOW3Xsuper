@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <functional>
 #include <unordered_map>
 #include <utility>
 #include <boost/container_hash/hash.hpp>
@@ -45,6 +46,10 @@ public:
     explicit TileManager(const Vulkan::Instance& instance, Vulkan::Scheduler& scheduler,
                          Vulkan::Runtime& runtime, StreamBuffer& stream_buffer);
     ~TileManager();
+
+    // Prepare common texture-upload converters before the guest can submit work.
+    // No game memory or texture contents are read here. Repeated calls reuse pipelines.
+    void WarmUp(const std::function<void(u32, u32)>& progress);
 
     void TileImage(Image& in_image, std::span<vk::BufferImageCopy> buffer_copies,
                    const VideoCore::Buffer* out_buffer, u64 out_offset);

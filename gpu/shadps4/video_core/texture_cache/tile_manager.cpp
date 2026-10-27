@@ -86,6 +86,26 @@ TileManager::TileManager(const Vulkan::Instance& instance_, Vulkan::Scheduler& s
 
 TileManager::~TileManager() = default;
 
+void TileManager::WarmUp(const std::function<void(u32, u32)>& progress) {
+    constexpr std::array modes{AmdGpu::TileMode::Thin1DThin, AmdGpu::TileMode::Thin2DThin};
+    constexpr std::array<u32, 5> widths{8, 16, 32, 64, 128};
+    u32 done = 0;
+    constexpr u32 total = modes.size() * widths.size();
+    if (progress) progress(done, total);
+    for (const auto mode : modes) {
+        for (const auto bits : widths) {
+            ImageInfo info{};
+            info.tile_mode = mode;
+            info.array_mode = AmdGpu::GetArrayMode(mode);
+            info.num_bits = bits;
+            info.num_samples = 1;
+            GetTilingPipeline(info, false);
+            if (progress) progress(++done, total);
+        }
+    }
+    LOG_INFO(Render_Vulkan, "Prepared {} texture upload pipelines", total);
+}
+
 vk::Pipeline TileManager::GetTilingPipeline(const ImageInfo& info, bool is_tiler) {
     const TilingKey key{
         .tile_mode = info.tile_mode,

@@ -35,12 +35,16 @@ std::shared_ptr<Index> ReadIndex(const fs::path& cache, const Profile& profile) 
     const auto time = fs::last_write_time(path, error);
     if (error)
         return {};
+    const auto pack_bytes = fs::file_size(cache / "templates.gtp", error);
+    if (error)
+        return {};
     static std::mutex mutex;
     struct Cached { fs::file_time_type time; std::shared_ptr<Index> index; };
     static std::unordered_map<fs::path, Cached> cached;
     std::scoped_lock lock{mutex};
     if (auto found = cached.find(path); found != cached.end() && found->second.time == time &&
-        found->second.index->header.profile == profile)
+        found->second.index->header.profile == profile &&
+        found->second.index->header.pack_bytes == pack_bytes)
         return found->second.index;
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     const auto size = file.tellg();
@@ -52,7 +56,7 @@ std::shared_ptr<Index> ReadIndex(const fs::path& cache, const Profile& profile) 
         header.info_size != sizeof(InfoPersistent) || header.profile != profile || !header.count ||
         header.count > 400000 ||
         size != std::streamoff(sizeof(header) + u64(header.count) * sizeof(TemplateLocation)) ||
-        fs::file_size(cache / "templates.gtp", error) != header.pack_bytes || error)
+        pack_bytes != header.pack_bytes)
         return {};
     std::vector<TemplateLocation> entries(header.count);
     if (!file.read(reinterpret_cast<char*>(entries.data()), entries.size() * sizeof(entries[0])) ||
@@ -260,6 +264,9 @@ void TemplateWriter::Finish() {
     fs::rename(state->cache / "templates.gtp.tmp", state->cache / "templates.gtp");
     fs::rename(state->cache / "templates.gti.tmp", state->cache / "templates.gti");
     state->finished = true;
+}
+bool PreparedLibraryReady(const fs::path& cache, const Profile& profile) {
+    return ReadIndex(cache, profile) && ReadIndex(cache / "vertex", profile);
 }
 bool TemplatesReady(const fs::path& cache, const Profile& profile, u64 library, u32& entries) {
     const auto index = ReadIndex(cache, profile);

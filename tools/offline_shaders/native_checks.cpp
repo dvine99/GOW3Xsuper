@@ -188,6 +188,26 @@ int RunOfflineShaderChecks() {
         writer.Alias(location, 124);
         writer.Finish();
     }
+    // Cold, partial, incompatible and truncated libraries must request preparation.
+    require(!PreparedLibraryReady(directory / "missing", profile));
+    require(!PreparedLibraryReady(directory, profile)); // fragment stage alone
+    {
+        auto vertex = baseline;
+        vertex.hw_stage = Shader::HwStage::Vertex;
+        vertex.sw_stage = Shader::SwStage::Vertex;
+        TemplateWriter writer(directory / "vertex", profile, 987);
+        const auto location = writer.Write(789, 1011, vertex, presence_source);
+        writer.Alias(location, 123);
+        writer.Finish();
+    }
+    require(PreparedLibraryReady(directory, profile));
+    auto incompatible_profile = profile;
+    incompatible_profile.needs_buffer_offsets = !profile.needs_buffer_offsets;
+    require(!PreparedLibraryReady(directory, incompatible_profile));
+    require(PreparedLibraryReady(directory, profile));
+    const auto vertex_pack = directory / "vertex/templates.gtp";
+    std::filesystem::resize_file(vertex_pack, std::filesystem::file_size(vertex_pack) - 1);
+    require(!PreparedLibraryReady(directory, profile)); // also invalidates in-memory index
     u32 entries = 0;
     require(TemplatesReady(directory, profile, 456, entries) && entries == 2);
     require(!TemplatesReady(directory, profile, 457, entries));
@@ -217,9 +237,8 @@ int RunOfflineShaderChecks() {
     current = baseline;
     current.offline_descriptor_snapshot = true;
     require(!TryTemplate(directory, 1011, 789, current, runtime, profile, result));
-    std::filesystem::remove(directory / "templates.gtp");
-    std::filesystem::remove(directory / "templates.gti");
-    std::filesystem::remove(directory);
+    // This test owns a unique temporary tree, including the new vertex fixture.
+    std::filesystem::remove_all(directory);
     std::puts("PASS: bounded asset descriptors, fetch semantics, template "
               "constants and invalid-input fallback");
     return 0;

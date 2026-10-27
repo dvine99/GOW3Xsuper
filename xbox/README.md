@@ -1,7 +1,14 @@
-# God of War 3 Launcher for Xbox
+# God of War III for Xbox
+
+**Published release: Beta 0 (1.0.26300.308).** The .436 release was removed.
+Its later first-start preparation entries below are historical experiments,
+not features of the published Beta 0 binary. See [the full report](../MODIFICATIONS.md).
 
 The Xbox app of this fork: God of War III Remastered on the Xbox Series X|S in Developer Mode,
-built on SpartanPort and Dozen ([CREDITS.md](CREDITS.md)). Installing it is described in the
+maintained here by dvine99, forked from **Devran Cosmo Uenal’s
+[gow3_xbox](https://github.com/Cosmo/gow3_xbox)**, itself a fork of
+**Felipe Prado and contributors’ [SpartanPort](https://github.com/FelipePrado0/SpartanPort)**,
+and using Dozen ([CREDITS.md](CREDITS.md)). Installing it is described in the
 [README](../README.md) at the top of the repository; this file is for building and developing it.
 
 New builds install over earlier ones and keep the app's data. Packages are signed with
@@ -10,8 +17,22 @@ purpose: it vouches for nobody, and with one shared key every build, from any ma
 GitHub, installs over the previous one. The Xbox in Developer Mode installs such packages.
 
 **Builds on GitHub**: `.github/workflows/xbox.yml` (Actions → Xbox build → Run workflow) builds
-Dozen from the Mesa fork, then the launcher and `GodOfWar3Launcher-<version>.zip`, and
-publishes it as a pre-release with the install steps.
+Dozen from the Mesa fork, then the launcher and `GOW3xbox<version>.zip`, and
+can publish it as a pre-release with the install steps when explicitly requested.
+See [our releases](../RELEASES.md), [maintained changes](../MODIFICATIONS.md) and
+[version history](../CHANGELOG.md).
+
+Performance controls and profiling for the Alpha 6-based changes are documented in
+[Xbox performance guide](PERFORMANCE.md)
+([Brazilian Portuguese](PERFORMANCE.pt-BR.md)).
+
+## Reading the development log
+
+The dated milestones below preserve the upstream development history. Statements
+such as “not playable yet” and console measurements describe their specific
+historical revision, not a fresh test of the current GOW3Xsuper package. Later
+entries record downstream work; use the root README and CHANGELOG for current
+release status. Current first-start changes still require on-console verification.
 
 The rest of this file is the development log.
 
@@ -625,17 +646,29 @@ keyboard fallback. This does not replace an in-game save/reload check on Xbox.
 
 ### Launcher shader preparation
 
-Normal boot now opens a controller/keyboard launcher before starting the game.
-Choose **Start game** or **Precompile shaders** using D-pad/arrow keys and A/Enter.
-Preparation displays scanning and compilation progress, then returns to the
-launcher with the prepared count. Unsupported shaders compile during gameplay.
+Normal boot opens a controller/keyboard launcher before starting the game.
+**Start game** prepares a missing or incompatible fragment/vertex template library
+on the target GPU profile, then prepares ten common texture upload converters
+(1D/2D thin, 8/16/32/64/128 bits) and loads previously recorded pipelines before
+starting the guest. A compatible complete library is reused on later launches.
+**Precompile shaders** performs the same preparation explicitly and returns to the
+menu. Repeating it in the same launch reuses the device pipelines already built.
+Progress remains visible during each stage. Preparation can take several minutes.
 
-The current CUSA01715 subset covers 154 resource-free fragment shader identities
-(40 distinct programs), including asset-derived input linkage. It checks three
-attachment variants per identity and reuses valid saved results on later runs.
-Textured fragments and vertex shaders are skipped. Preparation is native C++;
-no Python installation or prior playthrough is needed. See
-`tools/offline_shaders/README.md` for count definitions and validation.
+Normal Xbox startup compiles any missing live shader/pipeline synchronously rather
+than discarding its draw. This preserves one-time offscreen writes that may produce
+textures used later. It can stall on live variants absent from the prepared library,
+especially on the first run. **Fast start (may miss graphics)** explicitly retains
+the earlier asynchronous draw-skipping behavior when background shader compilation
+is enabled; it is unsuitable for diagnosing first-boot texture correctness.
+The in-game background-compilation option applies to that fast-start mode on Xbox.
+Readback synchronization and compiler queue scheduling match version1.0.26300.308.
+
+The native preparer covers asset-derived fragment and vertex templates as described
+in `tools/offline_shaders/README.md`. This prepares GCN-to-SPIR-V translation,
+not every possible driver pipeline state. With an empty gameplay cache, new driver
+states still compile on their first use; no complete first-run PSO inventory is
+invented. No console visual or frame-rate improvement is established by a build.
 
 Results are app-local at `user/shader/precompiled/CUSA01715`. Runtime lookup
 requires matching code, specialization and renderer profile; a miss or invalid
@@ -643,3 +676,60 @@ file uses the existing compiler. Driver/pipeline compilation can still occur.
 Private `graphics-debug.txt` may set `SPARTAN_PRECOMPILE_AUTORUN=1` for a bounded
 launcher smoke test; the default requires selecting the action. Existing
 `SPARTAN_UWP_CAPTURE=1` also writes `user/uwp-launcher.bmp` for launcher/progress QA.
+
+## App name, startup image and interface language
+
+The displayed app name is **God of War III**. Its package identity and publisher
+remain the same so upgrades preserve the existing installation and its data.
+The supplied logo is packaged as the black-background system startup splash
+(`assets/SplashScreen.png`).
+
+In the initial menu, choose **Language / Idioma** and then **English**,
+**Português brasileiro** or **Español**. English is the default. The selection
+applies immediately and is saved in `user/graphics.cfg` as `launcher_language`
+(`en`, `pt-BR`, `es`). Back or cancel keeps the previous selection.
+The preference applies throughout the app: initial menu, folder navigation,
+shader preparation/loading, in-game settings and their help, performance controls,
+status messages, app error dialogs and save/load dialogs. It can also be changed
+under **Game > Interface > Language** while playing. The saved choice is loaded
+before the first startup dialog. Native folder pickers request the same language
+from Windows; their shell presentation still depends on the installed OS resources.
+Game-provided dialogue, audio, save titles and player-entered text keep their
+original content. Technical developer logs retain their diagnostic text.
+
+Translations live in `locales/interface.json`; after editing them, run
+`python3 scripts/generate_xbox_translations.py` from the repository root. The
+checked-in C++ catalog avoids adding a Python dependency to the Xbox build.
+Run `python3 -m unittest discover -s tests -p test_app_translations.py -v` to
+check catalog synchronization and interface coverage.
+
+
+### Xbox cover resolution
+
+The shell icons and large/wide tiles now use the supplied cover artwork, with
+100%, 200% and 400% variants. The largest square is 1240 × 1240 pixels. The
+package indexes these variants in `resources.pri` before signing. See
+[artwork dimensions and regeneration](assets/README.md#xbox-cover-and-shell-icons).
+The existing startup logo remains the launch splash. Verify the expanded
+information view on Xbox after updating; shell scaling is controlled by the OS.
+
+
+### Test archive name
+
+The installable archive is named `GOW3xbox<version>.zip`, using the same four-part
+version written into the packaged Appx manifest (for example,
+`GOW3xbox1.0.26300.1200.zip`). It contains the signed `.appx` and `Dependencies/`
+for Device Portal installation. The example is a filename illustration, not a
+published build. The package identity and internal `.appx` name remain compatible
+with earlier installations.
+
+
+### Build the current task version
+
+`.github/workflows/xbox.yml` now also runs on pushes to
+`coderabbit/find-latest-game-version/d44cebf0`. Those runs upload
+`GOW3xbox<version>.zip` as an Actions artifact without publishing a release.
+Manual workflow runs retain the optional pre-release publication. Dozen uses
+the Windows 2022 runner to keep Visual Studio 2022/MSVC 14.44 as required by the
+existing build contract; the app uses the Windows 2025/Visual Studio 2026 runner.
+Resource checks run before the app build. Failed app builds upload diagnostics.

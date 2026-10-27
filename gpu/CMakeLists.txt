@@ -484,6 +484,21 @@ target_compile_options(readback-queue-test PRIVATE -UNDEBUG -Wall -Wextra -Werro
 add_executable(wait-diagnostics-test EXCLUDE_FROM_ALL ../tests/test_wait_diagnostics.cpp)
 target_include_directories(wait-diagnostics-test PRIVATE shadps4)
 target_compile_options(wait-diagnostics-test PRIVATE -UNDEBUG)
+add_executable(app-language-test EXCLUDE_FROM_ALL ../tests/test_app_language.cpp
+    shim/spartanport_settings.cpp)
+target_include_directories(app-language-test PRIVATE shim)
+target_compile_options(app-language-test PRIVATE -UNDEBUG)
+add_executable(launcher-language-test EXCLUDE_FROM_ALL ../tests/test_launcher_language.cpp
+    shim/spartanport_settings.cpp)
+target_include_directories(launcher-language-test PRIVATE shim)
+target_compile_options(launcher-language-test PRIVATE -UNDEBUG)
+add_executable(xbox-performance-test EXCLUDE_FROM_ALL ../tests/test_xbox_performance.cpp
+    shim/spartanport_settings.cpp)
+target_include_directories(xbox-performance-test PRIVATE shim)
+target_compile_options(xbox-performance-test PRIVATE -UNDEBUG)
+add_executable(frame-pacing-test EXCLUDE_FROM_ALL ../tests/test_frame_pacing.cpp)
+target_include_directories(frame-pacing-test PRIVATE shim)
+target_compile_options(frame-pacing-test PRIVATE -UNDEBUG)
 add_executable(graphics-settings-test EXCLUDE_FROM_ALL ../tests/test_graphics_settings.cpp
     shim/spartanport_settings.cpp)
 target_include_directories(graphics-settings-test PRIVATE shim)

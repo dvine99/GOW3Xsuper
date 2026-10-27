@@ -23,8 +23,11 @@ extern "C" void gow3_uwp_choose_game_folder(char* message, size_t size);
 #include "video_core/renderer_vulkan/vk_platform.h"
 #include "spartanport_overlay.h"
 #include "spartanport_settings.h"
+#include "spartanport_launcher_text.h"
+#include "spartanport_ui_language.h"
 #include "spartanport_graphics.h"
 #include "gow3_precompile.h"
+#include "gow3_template_cache.h"
 #include "video_core/renderer_vulkan/vk_temporal_upscaler.h"
 #include "video_core/renderer_vulkan/vk_presenter.h"
 #include "video_core/renderer_vulkan/vk_warmup_inbox.h"
@@ -295,7 +298,7 @@ void CaptureScreenshot(const Instance& instance, Scheduler& scheduler, vk::Comma
         }
         if (saved) {
             std::printf("Screenshot: %s (%ux%u)\n", Common::FS::PathToUTF8String(path).c_str(), width, height);
-            SpartanOverlay::ShowNotice("Screenshot saved: " + Common::FS::PathToUTF8String(path.filename()));
+            SpartanOverlay::ShowNotice(SpartanUi::Format("Screenshot saved: {}", {Common::FS::PathToUTF8String(path.filename())}));
         } else {
             LOG_ERROR(Render_Vulkan, "Screenshot: cannot write {}", Common::FS::PathToUTF8String(path));
             SpartanOverlay::ShowNotice("Screenshot failed: cannot write the file");
@@ -341,16 +344,45 @@ Presenter::Presenter(Frontend::WindowSDL& window_, AmdGpu::Liverpool* liverpool_
     pp_pass.Create(device, swapchain.GetSurfaceFormat().format);
     SpartanOverlay::Init(instance, swapchain.GetSurfaceFormat().format, num_images);
 
-    // spartanport: the launcher's "Start game without loading shaders" (StartOnDemand below).
+    // The explicit fast-start choice retains the original asynchronous draw-skipping path.
     [[maybe_unused]] bool on_demand = false;
 #ifdef GOW3_UWP
+    namespace L = SpartanLauncherText;
+    using K = L::Key;
+    auto& language = SpartanSettings::Get().launcher_language;
+    const auto tr = [&](K key) { return L::Get(key, language.load()); };
+    bool textures_prepared = false, pipelines_prepared = false;
+    const auto prepare_device = [&] {
+        if (!textures_prepared) {
+            SpartanOverlay::SetLoadingLabel(tr(K::PreparingTextures));
+            texture_cache.GetTileManager().WarmUp([&](u32 done, u32 total) {
+                SpartanOverlay::SetLoading(true, done, total);
+                PresentLoadingFrame();
+            });
+            textures_prepared = true;
+        }
+        if (!pipelines_prepared) {
+            SpartanOverlay::SetLoadingLabel(tr(K::LoadingCache));
+            SpartanOverlay::SetLoading(true, 0, 0);
+            PresentLoadingFrame();
+            auto last = std::chrono::steady_clock::time_point{};
+            rasterizer->GetPipelineCache().WarmUp([&](u32 done, u32 total) {
+                const auto now = std::chrono::steady_clock::now();
+                if (now - last < std::chrono::milliseconds(100) && done != total) return;
+                last = now;
+                SpartanOverlay::SetLoading(true, done, total);
+                PresentLoadingFrame();
+            });
+            pipelines_prepared = true;
+        }
+        SpartanOverlay::SetLoading(false, 0, 0);
+        SpartanOverlay::SetLoadingLabel({});
+    };
     if (const char* launcher=std::getenv("SPARTAN_UWP_LAUNCHER"); launcher && *launcher=='1') {
-        std::string title="God of War III Remastered";
-        char folder_line[600]{};
-        gow3_uwp_game_folder_line(folder_line,sizeof folder_line);
+        std::string status;
         const char* current=std::getenv("SPARTAN_PRECOMPILE_DUMP");
-        const auto choose=[&](const std::string& heading,const std::vector<std::string>& items) {
-            SpartanOverlay::BeginChoice(heading,items,{},0);
+        const auto choose=[&](const std::string& heading,const std::vector<std::string>& items,int focus=0) {
+            SpartanOverlay::BeginChoice(heading,items,{},focus);
             int choice=-1;
             while(choice==-1) {
                 // The dedicated UWP window thread already polls controller input.
@@ -363,15 +395,36 @@ Presenter::Presenter(Frontend::WindowSDL& window_, AmdGpu::Liverpool* liverpool_
         const char* automatic=std::getenv("SPARTAN_PRECOMPILE_AUTORUN");
         bool compile_once=automatic&&*automatic=='1';
         for (;;) {
+            bool start_after_preparation = false;
             int action=2;
             if (!compile_once) {
-                action=choose(*folder_line ? title+"\n"+folder_line : title,
-                              {"Start game","Start game without loading shaders","Precompile shaders",
-                               "Choose game folder"});
-                if(action==0) break;
+                std::string heading=std::string(L::AppName)+"\n"+tr(K::StartupHelp);
+                if(current&&*current) heading+="\n"+std::string(tr(K::Folder))+current;
+                if(!status.empty()) heading+="\n"+status;
+                action=choose(heading, {tr(K::Start),tr(K::StartOnDemand),tr(K::Precompile),
+                                       tr(K::ChooseFolder),tr(K::Language)});
+                if(action==4) {
+                    const int selected=choose(std::string(tr(K::Language))+"\n"+tr(K::LanguageHelp),
+                        {L::Languages[0],L::Languages[1],L::Languages[2],tr(K::Back)},
+                        L::Normalize(language.load()));
+                    if(selected>=0&&selected<int(L::Languages.size())) {
+                        SpartanSettings::SetInterfaceLanguage(selected);
+                        SpartanSettings::Save();
+                        status.clear();
+                    }
+                    continue;
+                }
+                if(action==0) {
+                    if (Gow3Precompile::PreparedLibraryReady(Gow3Precompile::CacheDirectory(),
+                            rasterizer->GetPipelineCache().GetProfile())) break;
+                    // A cold install prepares the native library before any guest draw.
+                    // A missing live specialization still compiles synchronously on first use.
+                    start_after_preparation = true;
+                    action = 2;
+                }
                 if(action==1) {
-                    // No warm-up: each pipeline is built when a draw first needs it (async shaders), and
-                    // saved to the cache as usual. Objects appear a moment late instead of a long wait.
+                    // Opt-in compatibility/performance tradeoff: pending draws may be lost.
+                    // Keep this out of normal first startup, including offscreen texture writes.
                     on_demand=true;
                     break;
                 }
@@ -387,19 +440,20 @@ Presenter::Presenter(Frontend::WindowSDL& window_, AmdGpu::Liverpool* liverpool_
                         if(tab==std::string::npos) continue;
                         paths.push_back(line.substr(0,tab));
                         const bool now=current&&_stricmp(paths.back().c_str(),current)==0;
-                        items.push_back(paths.back()+" ("+line.substr(tab+1)+(now ? ", current" : "")+")");
+                        const auto place=line.substr(tab+1);
+                        const std::string label=place=="internal storage" ? tr(K::Internal) :
+                                                place=="USB drive" ? tr(K::Usb) : place;
+                        items.push_back(paths.back()+" ("+label+(now ? ", "+std::string(tr(K::Current)) : "")+")");
                     }
-                    items.push_back("Browse USB drive...");
-                    items.push_back("Back");
-                    const int picked=choose("Choose the game folder\n"
-                        "Internal storage: put the dump anywhere under D:\\DevelopmentFiles.\n"
-                        "USB drive: any folder; choose it with Browse USB drive.",items);
+                    items.push_back(tr(K::Browse));
+                    items.push_back(tr(K::Back));
+                    const int picked=choose(tr(K::FolderHelp),items);
                     char message[512]{};
                     if(picked>=0&&picked<int(paths.size()))
                         gow3_uwp_use_game_folder(paths[picked].c_str(),message,sizeof message);
                     else if(picked==int(paths.size()))
                         gow3_uwp_choose_game_folder(message,sizeof message);
-                    if(*message) title=message;
+                    if(*message) status=message;
                     continue;
                 }
                 if(action!=2) continue;
@@ -407,31 +461,43 @@ Presenter::Presenter(Frontend::WindowSDL& window_, AmdGpu::Liverpool* liverpool_
             compile_once=false;
             try {
                 const char* dump=std::getenv("SPARTAN_PRECOMPILE_DUMP");
-                if(!dump||!*dump) throw std::runtime_error("Game folder is not configured");
+                if(!dump||!*dump) throw std::runtime_error(tr(K::NoFolder));
                 auto last=std::chrono::steady_clock::time_point{};
                 const auto result=Gow3Precompile::Prepare(dump,Gow3Precompile::CacheDirectory(),
                     rasterizer->GetPipelineCache().GetProfile(),[&](const auto& progress) {
                         const auto now=std::chrono::steady_clock::now();
                         if(now-last<std::chrono::milliseconds(100)&&progress.done!=progress.total) return;
                         last=now;
-                        SpartanOverlay::SetLoadingLabel(progress.scanning ? "Scanning game files..." :
-                            progress.vertex ? "Precompiling vertex shaders..." : "Precompiling fragment shaders...");
+                        SpartanOverlay::SetLoadingLabel(progress.scanning ? tr(K::Scanning) :
+                            progress.vertex ? tr(K::Vertex) : tr(K::Fragment));
                         SpartanOverlay::SetLoading(true,progress.done,progress.total);
                         PresentLoadingFrame();
                     });
-                title=fmt::format("{} shader entries prepared. Others compile during gameplay.{}",
-                    result.prepared_entries,result.failed ? " Some variants could not be prepared." : "");
+                status=std::to_string(result.prepared_entries)+tr(K::Prepared)+
+                    (result.failed ? tr(K::SomeFailed) : "");
                 std::printf("Launcher precompile: %u entries, %u variants ready\n",result.prepared_entries,result.compiled+result.already_cached);
+                // Include actual driver-side converters and previously observed pipeline states.
+                prepare_device();
             } catch(const std::exception& error) {
-                title=std::string("Precompilation could not finish: ")+error.what();
+                status=SpartanUi::T("Precompilation could not finish. Check loader.log for details.");
                 std::printf("Launcher precompile failed: %s\n",error.what());
             }
             SpartanOverlay::SetLoading(false,0,0);
             SpartanOverlay::SetLoadingLabel({});
+            if (start_after_preparation) break;
         }
     }
-#endif
-
+    rasterizer->GetPipelineCache().AllowPendingDrawSkip(on_demand);
+    std::printf("Xbox shader startup: %s\n", on_demand ? "fast; pending draws may be skipped"
+                                                        : "complete; required draws wait for shaders");
+    if (on_demand) {
+        rasterizer->GetPipelineCache().StartOnDemand();
+    } else {
+        // Normal Xbox startup loads existing pipelines before starting the guest,
+        // even when pipeline binaries/background warming are available.
+        prepare_device();
+    }
+#else
     const bool binary_cache = EmulatorSettingsImpl::Flag("SPARTAN_PIPELINE_BINARIES", true) &&
                               EmulatorSettings.IsPipelineCacheEnabled();
     const bool capture_only = EmulatorSettingsImpl::Flag("SPARTAN_PIPELINE_BINARY_ISOLATED", false) &&
@@ -464,6 +530,7 @@ Presenter::Presenter(Frontend::WindowSDL& window_, AmdGpu::Liverpool* liverpool_
         PresentLoadingFrame();
     });
     SpartanOverlay::SetLoading(false, 0, 0);
+#endif
 
 }
 

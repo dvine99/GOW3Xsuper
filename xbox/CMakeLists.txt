@@ -95,6 +95,8 @@ if(GOW3_BUILD_GRAPHICS)
 endif()
 add_custom_command(TARGET gow3_uwp POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory "${GOW3_LAYOUT}/Assets" "${GOW3_LAYOUT}/ThirdParty" "${GOW3_LAYOUT}/Patches"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_LIST_DIR}/assets/tiles" "${GOW3_LAYOUT}/Assets"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/assets/SplashScreen.png" "${GOW3_LAYOUT}/Assets/SplashScreen.png"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GOW3_ROOT}/patches/CUSA01623.xml" "${GOW3_LAYOUT}/Patches"
   COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:gow3_uwp>" "${GOW3_LAYOUT}"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GOW3_DEPS_ROOT}/libwinpthread/bin/libwinpthread-1.dll" "${GOW3_LAYOUT}"

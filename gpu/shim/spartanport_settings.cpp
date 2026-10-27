@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "spartanport_settings.h"
+#include "spartanport_launcher_text.h"
+#include "spartanport_ui_language.h"
 #include "spartanport_orbs.h"
 #include "spartanport_graphics.h"
 
@@ -26,6 +28,11 @@ float Clamp(float v, float lo, float hi) {
 }
 
 void Set(Values& v, const std::string& key, const std::string& value) {
+    if (key == "launcher_language") {
+        SetInterfaceLanguage(SpartanLauncherText::Parse(value));
+        return;
+    }
+    if (v.xbox_performance.Set(key, value)) return;
     const float f = float(std::atof(value.c_str()));
     const int i = std::atoi(value.c_str());
     static const char* const overlay_keys[] = {"overlay_fps", "overlay_frametime", "overlay_upscaler",
@@ -171,8 +178,14 @@ Values& Get() {
     return values;
 }
 
+void SetInterfaceLanguage(int language) {
+    Get().launcher_language = SpartanLauncherText::Normalize(language);
+    SpartanUi::Select(language);
+}
+
 void Load() {
     auto& v = Get();
+    SetInterfaceLanguage(0);
     if (FILE* file = std::fopen(Path(), "r")) {
         char line[256];
         while (std::fgets(line, sizeof(line), file)) {
@@ -212,6 +225,9 @@ void Load() {
             Set(v, key, value);
         }
     }
+#ifdef GOW3_UWP
+    v.xbox_performance.CaptureStartup([](const char* key) { return std::getenv(key); });
+#endif
     v.startup_preset = v.preset;
     v.startup_upscaler = v.upscaler;
     v.startup_object_motion = v.object_motion;
@@ -262,7 +278,11 @@ int CycleEngineFps() {
 
 bool GraphicsNeedRestart() {
     const auto& v = Get();
-    return v.render_resolution != v.startup_render_resolution ||
+    return
+#ifdef GOW3_UWP
+           v.xbox_performance.Changes() != 0 ||
+#endif
+           v.render_resolution != v.startup_render_resolution ||
            v.deferred_readback != v.startup_deferred_readback ||
            v.stale_readback != v.startup_stale_readback ||
            v.anisotropy != v.startup_anisotropy;
@@ -376,6 +396,9 @@ void Save() {
     // Read by run.sh at start.
     std::fprintf(file, "live_resolution=%s\n", v.live_resolution < 0 ? "auto"
                                                   : v.live_resolution ? "1" : "0");
+    std::fprintf(file, "launcher_language=%s\n",
+                 SpartanLauncherText::Codes[SpartanLauncherText::Normalize(v.launcher_language)]);
+    v.xbox_performance.Save(file);
     std::fclose(file);
 }
 

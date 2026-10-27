@@ -31,3 +31,8 @@ patches.json
 !packaging/icon/monogram.png
 /.vscode
 
+
+# Packaged Xbox startup artwork and shell cover variants.
+!xbox/assets/SplashScreen.png
+!xbox/assets/CoverSource.png
+!xbox/assets/tiles/*.png
