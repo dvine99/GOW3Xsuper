@@ -214,18 +214,19 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           $source = "https://github.com/$env:GITHUB_REPOSITORY/blob/$env:GITHUB_SHA"
           $notes = @"
-          Alpha for the **Xbox Series X|S** in Developer Mode (not the Xbox One). It contains no game files: you need your own dump of God of War III Remastered (tested: CUSA01715).
+          **God of War III — GOW3Xsuper**: port experimental para **Xbox Series X|S em Developer Mode**. Não funciona no Xbox One e não inclui arquivos do jogo; requer seu próprio dump de God of War III Remastered (referência: CUSA01715).
 
-          **Install**
-          1. Unzip on a PC.
-          2. Device Portal → **Add** → the ``.appx`` and the package in ``Dependencies``. If Dev Home lists the app as an App, set its type to **Game**.
-          3. Copy your dump (the folder with ``eboot.bin``, ``sce_module``, ``sce_sys`` and ``dvdroot_ps4``) to a USB drive (any folder; the app looks in ``\dumps\GodOfWar3`` by itself and otherwise asks you to choose the folder once) or to the console's internal storage anywhere under ``D:\DevelopmentFiles`` (found by itself).
-          4. Start **God of War III**: **Prepare** (once), **Precompile shaders** (once, recommended), then **Start game**. The menu shows the game folder it uses; **Choose game folder** lists the dumps the app found and can browse a USB drive.
-             **Start game** first loads every shader the game has used so far (longer the further you play); **Start game without loading shaders** starts at once and builds each shader when the game first needs it, so some objects can appear a moment late after loading.
+          **Origem e créditos**: este fork é mantido por dvine99 e deriva de [gow3_xbox, de Devran Cosmo Uenal](https://github.com/Cosmo/gow3_xbox), por sua vez derivado de [SpartanPort, de Felipe Prado e colaboradores](https://github.com/FelipePrado0/SpartanPort). [Créditos completos]($source/xbox/CREDITS.md) · [Modificações mantidas]($source/MODIFICATIONS.md) · [Histórico]($source/CHANGELOG.md).
 
-          In the game, **RS + LT** (click the right stick while holding the left trigger) opens the menu.
+          **Instalação**
+          1. Extraia o ZIP no PC.
+          2. Device Portal → **Add** → o arquivo ``.appx`` e a dependência em ``Dependencies``. No Dev Home, defina o tipo como **Game**.
+          3. Copie seu dump para USB ou para ``D:\DevelopmentFiles``. Se necessário, use **Escolher pasta do jogo**.
+          4. Abra **God of War III**, escolha o idioma, execute **Preparar**, **Pré-compilar shaders** e **Iniciar jogo**. Aguarde a preparação. O início normal tenta preparar uma biblioteca ausente ou incompatível e aguarda compilações necessárias; novos estados ainda podem causar pausas.
 
-          Installs over earlier builds and keeps your saves and settings. [Credits]($source/xbox/CREDITS.md)
+          **RS + LT** abre o menu durante o jogo. O início rápido pode omitir gráficos enquanto shaders compilam; prefira o início normal para testar o primeiro boot.
+
+          Atualiza a instalação existente mantendo a identidade do pacote. Build e assinatura não comprovam correção visual ou ganho de FPS no console. Não é um lançamento oficial da Sony ou Santa Monica Studio. [Guia e limitações]($source/README.md).
           "@
           $whats_new = "$env:WHATS_NEW".Trim()
           if ($whats_new -and -not $whats_new.Contains("`n")) {

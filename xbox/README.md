@@ -1,7 +1,10 @@
 # God of War III for Xbox
 
 The Xbox app of this fork: God of War III Remastered on the Xbox Series X|S in Developer Mode,
-built on SpartanPort and Dozen ([CREDITS.md](CREDITS.md)). Installing it is described in the
+maintained here by dvine99, forked from **Devran Cosmo Uenal’s
+[gow3_xbox](https://github.com/Cosmo/gow3_xbox)**, itself a fork of
+**Felipe Prado and contributors’ [SpartanPort](https://github.com/FelipePrado0/SpartanPort)**,
+and using Dozen ([CREDITS.md](CREDITS.md)). Installing it is described in the
 [README](../README.md) at the top of the repository; this file is for building and developing it.
 
 New builds install over earlier ones and keep the app's data. Packages are signed with
@@ -11,10 +14,20 @@ GitHub, installs over the previous one. The Xbox in Developer Mode installs such
 
 **Builds on GitHub**: `.github/workflows/xbox.yml` (Actions → Xbox build → Run workflow) builds
 Dozen from the Mesa fork, then the launcher and `GOW3xbox<version>.zip`, and
-publishes it as a pre-release with the install steps.
+can publish it as a pre-release with the install steps when explicitly requested.
+See [our releases](../RELEASES.md), [maintained changes](../MODIFICATIONS.md) and
+[version history](../CHANGELOG.md).
 
 Performance controls and profiling for the Alpha 6-based changes are documented in
 [Desempenho no Xbox (Português)](PERFORMANCE.pt-BR.md).
+
+## Reading the development log
+
+The dated milestones below preserve the upstream development history. Statements
+such as “not playable yet” and console measurements describe their specific
+historical revision, not a fresh test of the current GOW3Xsuper package. Later
+entries record downstream work; use the root README and CHANGELOG for current
+release status. Current first-start changes still require on-console verification.
 
 The rest of this file is the development log.
 

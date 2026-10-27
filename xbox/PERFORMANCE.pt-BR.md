@@ -1,4 +1,4 @@
-# Desempenho no Xbox — base Alpha 6
+# Desempenho no Xbox — controles e diagnóstico do GOW3Xsuper
 
 Base: `alpha-1.0.26299.2139`, commit
 `fe8c66ed3a9bf151557c8f0af57009bdc955b042` de `Cosmo/gow3_xbox`.
@@ -6,7 +6,9 @@ Base: `alpha-1.0.26299.2139`, commit
 Esta alteração integra controles de desempenho existentes ao menu e corrige a
 coleta de métricas. Não há benchmark de gameplay desta alteração: o sandbox
 Linux não tem Xbox, SDK do Windows, Dozen em execução nem dump/save do jogo.
-Não foi medida uma melhora de FPS nem produzido um pacote instalável.
+Não foi medida uma melhora de FPS. As versões próprias .308 e .436 já têm
+pacotes Windows/UWP compilados, assinados e verificados, disponíveis em
+[Releases](../RELEASES.md); a validação no console é separada.
 
 ## Menu
 
@@ -128,8 +130,10 @@ Testes portáveis cobrem persistência, valores inválidos, precedência das
 configurações privadas, dependências dos diagnósticos, aviso de reinicialização,
 histograma, pausas longas e agregação dos logs. O teste das opções é compilado
 com e sem `GOW3_UWP`; isso valida a lógica de configuração, não as APIs do Xbox.
-A build completa Windows/UWP, navegação visual por controle e benchmarks no
-console continuam obrigatórios antes de distribuir uma release com estas mudanças.
+As builds completas Windows/UWP e o empacotamento das versões .308/.436
+passaram. A .436 também passou pelo selftest nativo de cache de shaders.
+Navegação por controle, reprodução visual da falha e benchmarks no console
+continuam sem verificação neste ambiente. As distribuições são alphas para teste.
 
 
 ## Primeiro início a partir da versão 1.0.26300.308

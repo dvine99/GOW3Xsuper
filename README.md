@@ -1,50 +1,118 @@
-# God of War III for Xbox
+# God of War III — port experimental para Xbox
 
-God of War III Remastered on the **Xbox Series X|S in Developer Mode** (not the Xbox One). This
-fork of [SpartanPort](https://github.com/FelipePrado0/SpartanPort), the PC port by Felipe Prado and
-its contributors, adds the Xbox app (`xbox/`); everything about the port itself is in
-SpartanPort's README.
+**GOW3Xsuper é um fork comunitário mantido por [dvine99](https://github.com/dvine99).**
+Executa **God of War III Remastered no Xbox Series X|S em Modo de Desenvolvedor**,
+a partir de um dump do próprio jogador. **Não é compatível com Xbox One.**
 
-> **No game files are included.** You need a dump of God of War III Remastered from your own PS4
-> (tested: CUSA01715). This project is not affiliated with or endorsed by Sony Interactive
-> Entertainment or Santa Monica Studio. God of War is a trademark of Sony Interactive Entertainment.
+[Baixar versões próprias](https://github.com/dvine99/GOW3Xsuper/releases) ·
+[Modificações mantidas](MODIFICATIONS.md) · [Histórico](CHANGELOG.md) ·
+[Créditos completos](xbox/CREDITS.md) · [Compilar o port](xbox/README.md)
 
-## Install
+![Capa do aplicativo](xbox/assets/CoverSource.png)
 
-1. Download the zip from [Releases](https://github.com/Cosmo/gow3_xbox/releases) and unzip it on a PC.
-2. Device Portal → **Add** → the `.appx` and the package in `Dependencies`. If Dev Home lists the
-   app as an App, set its type to **Game**.
-3. Copy your dump (the folder with `eboot.bin`, `sce_module`, `sce_sys` and `dvdroot_ps4`) to one of:
-   - **a USB drive**, in any folder. The app looks in `\dumps\GodOfWar3` by itself and otherwise
-     asks you to choose the folder once.
-   - **the console's internal storage**, anywhere under `D:\DevelopmentFiles` (for example
-     `D:\DevelopmentFiles\dumps\GodOfWar3`). The app finds it there by itself, up to three folders
-     deep. This is the Dev Mode folder that apps may read; other places on the internal storage
-     are closed to apps.
-4. Start **God of War III**: **Prepare** (once), **Precompile shaders** (once, recommended),
-   then **Start game**. The menu shows the game folder it uses; **Choose game folder** lists the
-   dumps the app found (internal storage and USB) and can browse a USB drive.
-   - **Start game** first loads every shader the game has used so far ("Loading shader cache").
-     This takes longer the further you play (about 3 minutes with 7,000 shaders), but then
-     nothing has to be built during play.
-   - **Start game without loading shaders** starts at once and builds each shader the first time
-     the game needs it. After loading a save or entering a new area, some objects can appear a
-     moment late.
+## Origem: um fork de outro fork
 
-In the game, **RS + LT** (click the right stick while holding the left trigger) opens the menu:
-render resolution (720p by default), overlay, Automatic QTE, vibration and more.
+```text
+SpartanPort — Felipe Prado e colaboradores
+└── gow3_xbox — Devran Cosmo Uenal (Cosmo)
+    └── GOW3Xsuper — manutenção e adaptações de dvine99
+```
 
-New versions install over earlier ones and keep your saves and settings.
+- **[SpartanPort](https://github.com/FelipePrado0/SpartanPort)**, anteriormente
+  `gow3_pc`: projeto de Felipe Prado e colaboradores que fornece a base para PC,
+  incluindo loader, runtime, integração gráfica, menus e patches.
+- **[gow3_xbox](https://github.com/Cosmo/gow3_xbox)**: fork de
+  **[Devran Cosmo Uenal](https://github.com/Cosmo)** que adapta essa base ao Xbox.
+  Este é o **projeto de origem direto** do nosso repositório. O port para Xbox e
+  seu trabalho de integração são creditados a ele e aos colaboradores upstream.
+- **[GOW3Xsuper](https://github.com/dvine99/GOW3Xsuper)**: nosso fork desse port,
+  com as modificações descritas abaixo. Não reivindicamos autoria das bases herdadas.
 
-## Known issues
+Também dependemos de bloodborne_pc, shadPS4, Mesa/Dozen e outros projetos.
+A relação de autores, componentes e licenças está em [Créditos](xbox/CREDITS.md).
 
-- **4K needs more memory than the Xbox allows.** In Developer Mode an app gets at most 5 GiB. At
-  4K the app moves about 450 MiB of the game's memory to disk and runs at about 45 fps; heavy
-  scenes can stutter or run out of memory. At 720p (the default) nothing goes to disk.
-- **Occasional ghosting.** Now and then moving parts of the picture leave strong trails, for
-  example during the opening camera move on Gaia's back. It doesn't happen on every start; it
-  seems to come with frame rate drops, and its cause isn't known yet.
+## O que é este port?
 
-## Credits and license
+É um aplicativo **UWP experimental para o Developer Mode**. O loader e o runtime
+executam o código do dump de PS4; a camada gráfica derivada do shadPS4 traduz os
+shaders e comandos para Vulkan, e **Mesa/Dozen traduz Vulkan para Direct3D 12**
+no Xbox. Não é uma edição comercial nativa de God of War para Xbox.
 
-[xbox/CREDITS.md](xbox/CREDITS.md) lists everything this builds on. GPL-2.0, like SpartanPort.
+**Nenhum arquivo do jogo é distribuído.** Você precisa do seu próprio dump de
+God of War III Remastered; o dump de referência do projeto é **CUSA01715**.
+Este projeto não tem afiliação ou aprovação da Sony Interactive Entertainment
+ou da Santa Monica Studio. God of War pertence aos respectivos titulares.
+
+## O que modificamos e mantemos
+
+| Área | Trabalho deste fork |
+| --- | --- |
+| Interface | Português brasileiro, espanhol e inglês, com escolha persistente no menu inicial e nas configurações; tradução dos textos controlados pelo aplicativo. |
+| Identidade visual | Nome de exibição **God of War III**, logo na inicialização e nova capa com variantes de resolução para os tiles do Xbox. |
+| Configurações | 13 controles avançados para caminhos já existentes de gravação, cópias, memória, cache e diagnósticos. |
+| Profiling | Correções na coleta de frame pacing, p95/p99, memória e esperas; analisador de logs para comparação. |
+| Primeiro início | Na versão 1.0.26300.436, preparação da biblioteca de shaders, aquecimento de conversores de texturas e pipelines registrados; início normal aguarda compilações necessárias. |
+| Distribuição | Workflow Windows/UWP com testes, recursos de imagem, empacotamento, assinatura de teste e ZIP no padrão **GOW3xbox<versão>.zip**. |
+
+Consulte o [inventário detalhado](MODIFICATIONS.md), incluindo recursos herdados,
+limitações e as alterações retiradas. A tradução da interface do app **não traduz
+os diálogos, áudio ou textos fornecidos pelos arquivos do jogo**.
+
+## Releases deste fork
+
+| Versão | Situação | Download |
+| --- | --- | --- |
+| **1.0.26300.436** | Alpha atual; preparação para o primeiro início, baseada na .308 | [GOW3xbox1.0.26300.436.zip](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0436) |
+| **1.0.26300.308** | Versão anterior mantida como referência e alternativa | [GOW3xbox1.0.26300.308.zip](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0308) |
+
+A versão **1.0.26300.343 foi retirada** após relato de falha; suas mudanças foram
+revertidas. Não a utilizamos como base atual. Todas as versões válidas ficam em
+**[Releases do GOW3Xsuper](https://github.com/dvine99/GOW3Xsuper/releases)**.
+Veja [como publicamos versões](RELEASES.md) e o [histórico](CHANGELOG.md).
+
+## Instalação no Xbox Series X|S
+
+1. Ative o **Modo de Desenvolvedor** e abra o **Xbox Device Portal** pelo PC.
+2. Baixe o ZIP da versão desejada em Releases e extraia no PC.
+3. Em **Add**, instale o `.appx` e a dependência da pasta `Dependencies`.
+   Se o Dev Home o listar como aplicativo, altere o tipo para **Game**.
+4. Copie seu dump — pasta com `eboot.bin`, `sce_module`, `sce_sys` e `dvdroot_ps4` —
+   para USB ou para `D:\DevelopmentFiles` no console. A busca automática procura
+   `\dumps\GodOfWar3` no USB e até três níveis abaixo de `D:\DevelopmentFiles`;
+   use **Escolher pasta do jogo** se necessário.
+5. Abra **God of War III**, escolha seu idioma e execute **Preparar** na primeira
+   utilização. Na **1.0.26300.436**, use **Pré-compilar shaders** para antecipar a
+   preparação, depois **Iniciar jogo**. O início normal também tenta preparar uma
+   biblioteca ausente ou incompatível automaticamente.
+
+Aguarde a preparação terminar. Shaders e estados ainda desconhecidos podem
+compilar durante o jogo. **Início rápido (pode omitir gráficos)** é uma alternativa
+experimental que pode descartar desenhos enquanto a compilação está pendente;
+para testar o primeiro boot, prefira o início normal.
+
+Durante o jogo, **RS + LT** abre o menu. A resolução padrão é 720p. Os controles
+avançados indicados como aplicáveis ao próximo início exigem fechar e reabrir o
+app. A identidade interna do pacote foi preservada para permitir atualização
+sobre a instalação existente e manutenção dos dados.
+
+## Estado atual e problemas conhecidos
+
+- As duas versões publicadas passaram pela compilação Windows/UWP, empacotamento
+  e verificação dos arquivos. Isso não substitui testes no console.
+- Há relatos de texturas/letras corrompidas no primeiro boot, ghosting e stuttering.
+  A .436 aborda desenhos omitidos durante compilação, mas **a correção visual da
+  cena relatada ainda precisa ser confirmada no Xbox**.
+- Não há ganho de FPS medido deste fork. Preparar mais shaders pode alongar o
+  carregamento; aguardar compilações pode causar pausas durante o jogo.
+- Memória é limitada no Developer Mode; resoluções altas aumentam a pressão.
+  FSR e resolução dinâmica não foram habilitados como recursos funcionais no Xbox.
+
+Para relatar um problema, inclua versão do app, modelo do console, idioma,
+resolução, passos para reproduzir, imagem e `loader.log`, sem dados pessoais.
+Veja o [guia de diagnóstico e desempenho](xbox/PERFORMANCE.pt-BR.md).
+
+## Licença e reconhecimento
+
+Mantemos a licença [GPL-2.0](LICENSE) e os avisos dos componentes de terceiros.
+Os créditos não se limitam aos mantenedores deste fork: leia a
+[relação completa de autores e licenças](xbox/CREDITS.md).

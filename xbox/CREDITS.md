@@ -1,14 +1,33 @@
 # Credits
 
-God of War III (gow3_xbox) runs God of War III Remastered on the Xbox Series X|S in
+God of War III (GOW3Xsuper, a fork of gow3_xbox) runs God of War III Remastered on the Xbox Series X|S in
 Developer Mode from the player's own dump. It contains no game code or game assets.
+
+## Fork lineage and current maintenance
+
+**SpartanPort → Cosmo/gow3_xbox → dvine99/GOW3Xsuper**
+
+- **Devran Cosmo Uenal (Cosmo)** — [gow3_xbox](https://github.com/Cosmo/gow3_xbox),
+  the immediate upstream of this repository. Credit for the Xbox adaptation and
+  integration belongs to him and the upstream contributors, building on SpartanPort.
+- **Felipe Prado and contributors** — [SpartanPort](https://github.com/FelipePrado0/SpartanPort),
+  the upstream PC foundation from which gow3_xbox was forked.
+- **dvine99** — [GOW3Xsuper](https://github.com/dvine99/GOW3Xsuper), maintenance of
+  this downstream fork: app localization, artwork integration, advanced settings,
+  profiling corrections, first-start shader preparation and build/distribution work.
+  See the [maintained modifications](../MODIFICATIONS.md) and [version history](../CHANGELOG.md)
+  in the source repository. Changes withdrawn after testing are documented separately.
+
+This is an unofficial experimental port, not an Xbox release by Sony Interactive
+Entertainment or Santa Monica Studio. God of War and its game assets belong to
+their respective owners. No game files are distributed here.
 
 ## Built on
 
 - **SpartanPort** (formerly gow3_pc) by Felipe Prado and its contributors
   (https://github.com/FelipePrado0/SpartanPort): the PC port and launcher of God of War III
   Remastered. Its native loader, runtime, renderer integration, in-game menu and game patches
-  are the base of this project, which is a fork of it. GPL-2.0.
+  are the base inherited through gow3_xbox. GPL-2.0.
 - **bloodborne_pc** by Supermedo (https://github.com/Supermedo/bloodborne_pc), which SpartanPort
   started from. GPL-2.0.
 - **shadPS4** (https://github.com/shadps4-emu/shadPS4): the PS4 graphics emulation, its shader
