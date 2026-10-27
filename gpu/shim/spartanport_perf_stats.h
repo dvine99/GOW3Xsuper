@@ -6,6 +6,7 @@
 #pragma once
 
 #include <algorithm>
+#include "spartanport_ui_language.h"
 #include <cstdint>
 #include <cstdio>
 #include <string>
@@ -46,7 +47,7 @@ inline float CpuPercent(uint64_t process_delta, uint64_t wall_delta, unsigned co
 }
 
 /// The overlay text for the items in `mask`: one line each, or one line when `row`.
-inline std::string Format(const Sample& s, unsigned mask, bool row) {
+inline std::string Format(const Sample& s, unsigned mask, bool row, int language = 0) {
     std::string out;
     char part[160];
     const auto add = [&] {
@@ -55,9 +56,9 @@ inline std::string Format(const Sample& s, unsigned mask, bool row) {
         }
         out += part;
     };
-    const auto pair = [](char* to, size_t size, const char* label, double used, double total) {
+    const auto pair = [language](char* to, size_t size, const char* label, double used, double total) {
         if (used < 0.0) {
-            std::snprintf(to, size, "%s n/a", label);
+            std::snprintf(to, size, "%s %s", label, SpartanUi::Translate("n/a", language));
         } else if (total < 0.0) {
             std::snprintf(to, size, "%s %.1f GB", label, used);
         } else {
@@ -73,13 +74,13 @@ inline std::string Format(const Sample& s, unsigned mask, bool row) {
         add();
     }
     if (mask & Upscaler) {
-        std::snprintf(part, sizeof(part), "%s", s.upscaler.empty() ? "Native" : s.upscaler.c_str());
+        std::snprintf(part, sizeof(part), "%s", s.upscaler.empty() ? SpartanUi::Translate("Native", language) : s.upscaler.c_str());
         add();
     }
     if (mask & Gpu) {
         const char* name = s.gpu_name.empty() ? "GPU" : s.gpu_name.c_str();
         if (s.gpu_percent < 0.0f) {
-            std::snprintf(part, sizeof(part), "%s n/a", name);
+            std::snprintf(part, sizeof(part), "%s %s", name, SpartanUi::Translate("n/a", language));
         } else {
             std::snprintf(part, sizeof(part), "%s %.0f%%", name, s.gpu_percent);
         }
@@ -87,7 +88,7 @@ inline std::string Format(const Sample& s, unsigned mask, bool row) {
     }
     if (mask & Cpu) {
         if (s.cpu_percent < 0.0f) {
-            std::snprintf(part, sizeof(part), "CPU n/a");
+            std::snprintf(part, sizeof(part), "CPU %s", SpartanUi::Translate("n/a", language));
         } else {
             std::snprintf(part, sizeof(part), "CPU %.0f%%", s.cpu_percent);
         }

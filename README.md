@@ -1,4 +1,4 @@
-# God of War 3 Launcher for Xbox
+# God of War III for Xbox
 
 God of War III Remastered on the **Xbox Series X|S in Developer Mode** (not the Xbox One). This
 fork of [SpartanPort](https://github.com/FelipePrado0/SpartanPort), the PC port by Felipe Prado and
@@ -21,7 +21,7 @@ SpartanPort's README.
      `D:\DevelopmentFiles\dumps\GodOfWar3`). The app finds it there by itself, up to three folders
      deep. This is the Dev Mode folder that apps may read; other places on the internal storage
      are closed to apps.
-4. Start **God of War 3 Launcher**: **Prepare** (once), **Precompile shaders** (once, recommended),
+4. Start **God of War III**: **Prepare** (once), **Precompile shaders** (once, recommended),
    then **Start game**. The menu shows the game folder it uses; **Choose game folder** lists the
    dumps the app found (internal storage and USB) and can browse a USB drive.
    - **Start game** first loads every shader the game has used so far ("Loading shader cache").

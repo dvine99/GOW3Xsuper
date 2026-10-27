@@ -1,6 +1,6 @@
 # Credits
 
-God of War 3 Launcher (gow3_xbox) runs God of War III Remastered on the Xbox Series X|S in
+God of War III (gow3_xbox) runs God of War III Remastered on the Xbox Series X|S in
 Developer Mode from the player's own dump. It contains no game code or game assets.
 
 ## Built on

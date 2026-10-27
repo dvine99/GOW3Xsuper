@@ -6,6 +6,7 @@
 #pragma once
 
 #include "../../src/cheat_hook.h"
+#include "spartanport_xbox_performance.h"
 
 #include <atomic>
 #include <cstdint>
@@ -28,6 +29,8 @@ inline constexpr int OutputCount = 4;
 inline constexpr int OutputDefault = 1; ///< 1920x1080, the game's own size
 
 struct Values {
+    std::atomic<int> launcher_language{0}; // Entire app UI: English, Brazilian Portuguese, Spanish.
+    SpartanXboxPerformance::Settings xbox_performance;
     std::atomic<int> upscaler{UpscalerFsr3};
     std::atomic<int> preset{NativeAA};
     std::atomic<bool> sharpen{true};
@@ -148,6 +151,8 @@ Values& Get();
 
 /// Reads the file, then the environment overrides. Called once at start.
 void Load();
+/// Sets the shared app UI locale and its persisted settings value together.
+void SetInterfaceLanguage(int language);
 /// Checks the loaded choice before the first frame; unsupported FSR 4 uses FSR 3.1.
 void ConfigureUpscalerSupport(bool fsr4, bool fsr411);
 /// After device creation: DLSS availability; a DLSS setting falls back to FSR 3.1 without it.

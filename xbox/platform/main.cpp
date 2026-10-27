@@ -1,3 +1,8 @@
+#include "../../gpu/shim/spartanport_xbox_performance.h"
+#include "../../gpu/shim/spartanport_ui_language.h"
+#include <winrt/Windows.Globalization.h>
+
+using SpartanUi::T;
 #include <winrt/Windows.ApplicationModel.Core.h>
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.ApplicationModel.Activation.h>
@@ -144,15 +149,24 @@ extern "C" IUnknown* gow3_uwp_core_window() {
 
 // A system dialog for the player, which the controller operates: the index of the chosen button, -1 when it
 // could not be shown. The last button is the one B (Escape) chooses.
+static void apply_system_ui_language() {
+    try {
+        winrt::Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride(
+            winrt::to_hstring(SpartanLauncherText::Codes[SpartanUi::language.load()]));
+    } catch(winrt::hresult_error const& error) {
+        std::printf("App language override failed: 0x%08x\n",static_cast<unsigned>(error.code()));
+    }
+}
 static int ask(std::string const& text,std::vector<std::string> const& buttons) {
     std::printf("Player dialog: %s\n",text.c_str());
     auto choice=std::make_shared<std::promise<int>>();
     auto answer=choice->get_future();
     core_window.get().Dispatcher().RunAsync(winrt::Windows::UI::Core::CoreDispatcherPriority::Normal,[text,buttons,choice] {
         try {
-            winrt::Windows::UI::Popups::MessageDialog dialog(winrt::to_hstring(text),L"God of War III");
+            apply_system_ui_language();
+            winrt::Windows::UI::Popups::MessageDialog dialog(winrt::to_hstring(T(text.c_str())),L"God of War III");
             for(size_t i=0;i<buttons.size();++i)
-                dialog.Commands().Append(winrt::Windows::UI::Popups::UICommand(winrt::to_hstring(buttons[i]),nullptr,winrt::box_value(int(i))));
+                dialog.Commands().Append(winrt::Windows::UI::Popups::UICommand(winrt::to_hstring(T(buttons[i].c_str())),nullptr,winrt::box_value(int(i))));
             dialog.DefaultCommandIndex(0);
             dialog.CancelCommandIndex(uint32_t(buttons.size()-1));
             dialog.ShowAsync().Completed([choice](auto const& operation,winrt::Windows::Foundation::AsyncStatus status) {
@@ -235,6 +249,7 @@ static winrt::Windows::Storage::StorageFolder pick_folder() {
     auto answer=choice->get_future();
     core_window.get().Dispatcher().RunAsync(winrt::Windows::UI::Core::CoreDispatcherPriority::Normal,[choice] {
         try {
+            apply_system_ui_language();
             winrt::Windows::Storage::Pickers::FolderPicker picker;
             picker.SuggestedStartLocation(winrt::Windows::Storage::Pickers::PickerLocationId::ComputerFolder);
             picker.FileTypeFilter().Append(L"*");
@@ -271,9 +286,10 @@ static std::string use_picked(winrt::Windows::Storage::StorageFolder const& fold
         remember_dump(dump);
         return dump;
     }
-    problem=listed ? "The game cannot read its files from "+dump+".\n\nCopy the dump to a USB drive and choose it there."
-                   : "There is no eboot.bin in "+(dump.empty() ? std::string("this folder") : dump)+".\n\nChoose the folder of "
-                     "the dump: the one with eboot.bin, sce_module, sce_sys and dvdroot_ps4.";
+    problem=listed ? SpartanUi::Format("The game cannot read its files from {}", {dump})+
+                        T("\n\nCopy the dump to a USB drive and choose it there.")
+                   : SpartanUi::Format("There is no eboot.bin in {}.\n\nChoose the folder of your dump, the one with eboot.bin.",
+                        {dump.empty() ? T("this folder") : dump});
     return {};
 }
 
@@ -292,9 +308,10 @@ static std::string choose_dump(std::string text) {
 static std::string switch_game_folder(std::string const& dump) {
     remember_dump(dump);
     const char* current=std::getenv("SPARTAN_PRECOMPILE_DUMP");
-    if(current&&_stricmp(dump.c_str(),current)==0) return "This is already the game folder.";
+    if(current&&_stricmp(dump.c_str(),current)==0) return T("This is already the game folder.");
     std::printf("Game folder chosen: %s\n",dump.c_str());
-    ask("Game folder: "+dump+" ("+describe_place(dump)+")\n\nStart the app again to play from this folder.",{"OK"});
+    ask(std::string(T("Game folder: "))+dump+" ("+T(describe_place(dump).c_str())+")"+
+        T("\n\nStart the app again to play from this folder."),{"OK"});
     close_app("game folder changed");
 }
 
@@ -437,7 +454,8 @@ static bool prepare_game(std::string const& dump,std::string const& prepared,boo
         {"sce_module\\libc.prx",&files.libc},{"sce_module\\libSceFios2.prx",&files.fios},{"sce_sys\\param.sfo",&files.sfo}};
     for(auto [name,data]:inputs) {
         if(!read_file(dump+"\\"+name,*data)||data->empty()) {
-            stop("The game dump in "+dump+" is incomplete: "+name+" is missing or empty.\n\nCopy the whole dump again.",player);
+            stop(SpartanUi::Format("The game dump in {} is incomplete: {} is missing or empty.\n\nCopy the whole dump again.",
+                {dump,name}),player);
             return false;
         }
     }
@@ -446,7 +464,11 @@ static bool prepare_game(std::string const& dump,std::string const& prepared,boo
         "\\Patches\\CUSA01623.xml";
     if(!read_file(patch_path,patch_file)) { stop("This app is incomplete: its patch file is missing. Install the app again.",player); return false; }
     const std::string patches(patch_file.begin(),patch_file.end());
-    if(auto problem=Gow3Prepare::CheckTitle(files.sfo);!problem.empty()) { stop("The game dump in "+dump+" "+problem,player); return false; }
+    if(auto problem=Gow3Prepare::CheckTitle(files.sfo);!problem.empty()) {
+        std::printf("Game identification failed: %s\n",problem.c_str());
+        stop(SpartanUi::Format("The game dump in {} could not be recognized. Check sce_sys\\param.sfo and copy the dump again.",
+            {dump}),player); return false;
+    }
     char marker[96];
     std::snprintf(marker,sizeof marker,"gow3-uwp-prepared " GOW3_PREPARED_FORMAT "\nsource %016llx\n",
                   static_cast<unsigned long long>(Gow3Prepare::Fingerprint(files,patches)));
@@ -462,13 +484,17 @@ static bool prepare_game(std::string const& dump,std::string const& prepared,boo
         }
         if(ready) { std::printf("Prepared game files: %s\n",prepared.c_str()); return true; }
     }
-    if(player&&ask("Game found: "+dump+"\n\nPrepare the game files? This is needed once and takes a few seconds.",{"Prepare","Cancel"})!=0)
+    if(player&&ask(SpartanUi::Format("Game found: {}\n\nPrepare the game files? This is needed once and takes a few seconds.",
+        {dump}),{"Prepare","Cancel"})!=0)
         close_app("game preparation declined");
     std::printf("Preparing game files from %s\n",dump.c_str());
     const auto started=std::chrono::steady_clock::now();
     Gow3Prepare::Files result;
     try { result=Gow3Prepare::Prepare(files,patches); }
-    catch(std::exception const& error) { stop(std::string("Preparing the game files failed: ")+error.what(),player); return false; }
+    catch(std::exception const& error) {
+        std::printf("Game preparation failed: %s\n",error.what());
+        stop("Preparing the game files failed. Check loader.log for details.",player); return false;
+    }
     DeleteFileFromAppW(winrt::to_hstring(prepared+"\\format.txt").c_str());
     // resolutions.txt: one "<resolution> <direct memory MiB>" line per patches-<resolution>.bin.
     std::string memory;
@@ -481,7 +507,7 @@ static bool prepare_game(std::string const& dump,std::string const& prepared,boo
     }
     written.emplace_back("resolutions.txt",Gow3Prepare::Bytes(memory.begin(),memory.end()));
     for(auto const& [name,data]:written) {
-        if(!write_file(prepared+"\\"+name,data)) { stop("Writing the prepared game file "+name+" failed.",player); return false; }
+        if(!write_file(prepared+"\\"+name,data)) { stop(SpartanUi::Format("Writing the prepared game file {} failed.",{name}),player); return false; }
     }
     if(!write_file(prepared+"\\format.txt",Gow3Prepare::Bytes(marker,marker+std::strlen(marker)))) {
         stop("Writing the prepared game files failed.",player); return false;
@@ -494,6 +520,8 @@ static bool prepare_game(std::string const& dump,std::string const& prepared,boo
 static void loader() {
     winrt::init_apartment(winrt::apartment_type::multi_threaded);
     auto local=winrt::Windows::Storage::ApplicationData::Current().LocalFolder().Path();
+    // Read the UI preference before folder access or game preparation can open a dialog.
+    SpartanUi::LoadPreference(std::filesystem::path(std::wstring(local)+L"\\user\\graphics.cfg"));
     {
         std::ifstream limit_file(std::wstring(local)+L"\\memory_limit_mb.txt");
         uint64_t mb=0;
@@ -674,18 +702,10 @@ static void loader() {
     _putenv_s("SPARTAN_UPSCALER","off");
     _putenv_s("SPARTAN_READBACK_LINEAR","1");
     if(!std::getenv("SPARTAN_NO_MSAA")) _putenv_s("SPARTAN_NO_MSAA","1");
-    if(!std::getenv("SPARTAN_DRAW_PIPE")) _putenv_s("SPARTAN_DRAW_PIPE","1");
-    if(!std::getenv("SPARTAN_VK_RECORD_THREAD")) _putenv_s("SPARTAN_VK_RECORD_THREAD","1");
-    // Guest memory copies on two threads: the Vulkan recording thread is the busiest one with Dozen.
-    if(!std::getenv("SPARTAN_COPY_THREADS")) _putenv_s("SPARTAN_COPY_THREADS","2");
     if(!std::getenv("SPARTAN_PREP_WORKERS")) _putenv_s("SPARTAN_PREP_WORKERS","0");
     // Finish saved-pipeline loading before play; reserve background compilation for new effects.
     // Compiler concurrency and retained IR pools are bounded separately in the UWP renderer.
-    const std::pair<const char*,const char*> performance_defaults[]={
-        {"SPARTAN_PIPELINE_CACHE","1"},{"SPARTAN_BACKGROUND_WARMUP","0"},{"SPARTAN_PARALLEL_WARMUP","1"},
-        {"SPARTAN_PIPELINE_BINARIES","1"},{"SPARTAN_STREAM_MEMORY","cached"}
-    };
-    for(auto [key,value]:performance_defaults) if(!std::getenv(key)) _putenv_s(key,value);
+    if(!std::getenv("SPARTAN_BACKGROUND_WARMUP")) _putenv_s("SPARTAN_BACKGROUND_WARMUP","0");
     // The in-game menu's settings, as upstream's launcher reads them before a start: the render resolution chooses
     // the patches, and the settings the renderer reads as variables are passed on (graphics-debug.txt still wins).
     std::map<std::string,std::string> menu;
@@ -701,6 +721,10 @@ static void loader() {
         const auto found=menu.find(key);
         return found==menu.end() ? std::string(fallback) : found->second;
     };
+    SpartanXboxPerformance::Apply(
+        [&](const char* key) { return setting(key, ""); },
+        [](const char* key) { return std::getenv(key); },
+        [](const char* key, const char* value) { _putenv_s(key, value); });
     struct Passed {const char* variable; const char* key; const char* fallback;};
     const Passed passed[]={{"SPARTAN_ASYNC_SHADERS","async_shaders","1"},
         {"SPARTAN_DEFERRED_READBACK","deferred_readback","1"},{"SPARTAN_STALE_READBACK","stale_readback","1"}};

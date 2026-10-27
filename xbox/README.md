@@ -1,4 +1,4 @@
-# God of War 3 Launcher for Xbox
+# God of War III for Xbox
 
 The Xbox app of this fork: God of War III Remastered on the Xbox Series X|S in Developer Mode,
 built on SpartanPort and Dozen ([CREDITS.md](CREDITS.md)). Installing it is described in the
@@ -10,8 +10,11 @@ purpose: it vouches for nobody, and with one shared key every build, from any ma
 GitHub, installs over the previous one. The Xbox in Developer Mode installs such packages.
 
 **Builds on GitHub**: `.github/workflows/xbox.yml` (Actions → Xbox build → Run workflow) builds
-Dozen from the Mesa fork, then the launcher and `GodOfWar3Launcher-<version>.zip`, and
+Dozen from the Mesa fork, then the launcher and `GOW3xbox<version>.zip`, and
 publishes it as a pre-release with the install steps.
+
+Performance controls and profiling for the Alpha 6-based changes are documented in
+[Desempenho no Xbox (Português)](PERFORMANCE.pt-BR.md).
 
 The rest of this file is the development log.
 
@@ -643,3 +646,60 @@ file uses the existing compiler. Driver/pipeline compilation can still occur.
 Private `graphics-debug.txt` may set `SPARTAN_PRECOMPILE_AUTORUN=1` for a bounded
 launcher smoke test; the default requires selecting the action. Existing
 `SPARTAN_UWP_CAPTURE=1` also writes `user/uwp-launcher.bmp` for launcher/progress QA.
+
+## App name, startup image and interface language
+
+The displayed app name is **God of War III**. Its package identity and publisher
+remain the same so upgrades preserve the existing installation and its data.
+The supplied logo is packaged as the black-background system startup splash
+(`assets/SplashScreen.png`).
+
+In the initial menu, choose **Language / Idioma** and then **English**,
+**Português brasileiro** or **Español**. English is the default. The selection
+applies immediately and is saved in `user/graphics.cfg` as `launcher_language`
+(`en`, `pt-BR`, `es`). Back or cancel keeps the previous selection.
+The preference applies throughout the app: initial menu, folder navigation,
+shader preparation/loading, in-game settings and their help, performance controls,
+status messages, app error dialogs and save/load dialogs. It can also be changed
+under **Game > Interface > Language** while playing. The saved choice is loaded
+before the first startup dialog. Native folder pickers request the same language
+from Windows; their shell presentation still depends on the installed OS resources.
+Game-provided dialogue, audio, save titles and player-entered text keep their
+original content. Technical developer logs retain their diagnostic text.
+
+Translations live in `locales/interface.json`; after editing them, run
+`python3 scripts/generate_xbox_translations.py` from the repository root. The
+checked-in C++ catalog avoids adding a Python dependency to the Xbox build.
+Run `python3 -m unittest discover -s tests -p test_app_translations.py -v` to
+check catalog synchronization and interface coverage.
+
+
+### Xbox cover resolution
+
+The shell icons and large/wide tiles now use the supplied cover artwork, with
+100%, 200% and 400% variants. The largest square is 1240 × 1240 pixels. The
+package indexes these variants in `resources.pri` before signing. See
+[artwork dimensions and regeneration](assets/README.md#xbox-cover-and-shell-icons).
+The existing startup logo remains the launch splash. Verify the expanded
+information view on Xbox after updating; shell scaling is controlled by the OS.
+
+
+### Test archive name
+
+The installable archive is named `GOW3xbox<version>.zip`, using the same four-part
+version written into the packaged Appx manifest (for example,
+`GOW3xbox1.0.26300.1200.zip`). It contains the signed `.appx` and `Dependencies/`
+for Device Portal installation. The example is a filename illustration, not a
+published build. The package identity and internal `.appx` name remain compatible
+with earlier installations.
+
+
+### Build the current task version
+
+`.github/workflows/xbox.yml` now also runs on pushes to
+`coderabbit/find-latest-game-version/d44cebf0`. Those runs upload
+`GOW3xbox<version>.zip` as an Actions artifact without publishing a release.
+Manual workflow runs retain the optional pre-release publication. Dozen uses
+the Windows 2022 runner to keep Visual Studio 2022/MSVC 14.44 as required by the
+existing build contract; the app uses the Windows 2025/Visual Studio 2026 runner.
+Resource checks run before the app build. Failed app builds upload diagnostics.

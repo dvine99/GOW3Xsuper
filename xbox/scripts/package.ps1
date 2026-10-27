@@ -1,7 +1,7 @@
 #requires -Version 7.2
 # The installable package of the build: GodOfWar3Launcher_<version>_x64.appx, signed with signing/gow3_xbox-signing.pfx,
 # the public self-signed test key for the manifest's publisher CN=gow3_xbox (README.md), the VCLibs framework package it
-# needs in Dependencies, and both in GodOfWar3Launcher-<version>.zip for a release. The version is the time in UTC, so
+# needs in Dependencies, and both in GOW3xbox<version>.zip for a release. The version is the time in UTC, so
 # every package, from any machine or from GitHub, installs over the previous one and keeps the app's data.
 [CmdletBinding()]
 param([string]$Out='')
@@ -32,6 +32,19 @@ $version='1.0.{0}.{1}' -f ($now.Year%100*1000+$now.DayOfYear),([int]$now.ToStrin
 $manifest=Join-Path $stage 'AppxManifest.xml'
 $content=(Get-Content -LiteralPath $manifest -Raw).Replace('Version="1.0.0.0"',"Version=`"$version`"")
 [IO.File]::WriteAllText($manifest,$content,[Text.UTF8Encoding]::new($false))
+# Index scale-qualified shell artwork before MakeAppx validates the manifest.
+# Keep every resolution in this one sideloadable package (no resource packs).
+$priConfig=Join-Path $Out 'priconfig.xml'
+& "$sdk/makepri.exe" createconfig /cf $priConfig /dq en-US /pv 10.0 /o *> (Join-Path $Out 'pri-config.log')
+if($LASTEXITCODE) { Get-Content (Join-Path $Out 'pri-config.log') -Tail 12; throw 'Resource configuration failed' }
+[xml]$priXml=Get-Content -LiteralPath $priConfig -Raw
+foreach($node in @($priXml.SelectNodes('/resources/packaging'))) { [void]$node.ParentNode.RemoveChild($node) }
+$priXml.Save([IO.Path]::GetFullPath($priConfig))
+# A reused output directory must not merge its previous index into the new one.
+Remove-Item -LiteralPath (Join-Path $stage 'resources.pri') -ErrorAction SilentlyContinue
+& "$sdk/makepri.exe" new /pr $stage /cf $priConfig /mn $manifest /of (Join-Path $stage 'resources.pri') /o *> (Join-Path $Out 'pri-index.log')
+if($LASTEXITCODE) { Get-Content (Join-Path $Out 'pri-index.log') -Tail 12; throw 'Resource indexing failed' }
+if(!(Test-Path -LiteralPath (Join-Path $stage 'resources.pri'))) { throw 'Resource index missing' }
 $package=Join-Path $Out "GodOfWar3Launcher_$version`_x64.appx"
 & "$sdk/makeappx.exe" pack /d $stage /p $package /o *> (Join-Path $Out 'pack.log')
 if($LASTEXITCODE) { Get-Content (Join-Path $Out 'pack.log') -Tail 12; throw 'Package creation failed' }
@@ -40,7 +53,7 @@ if($LASTEXITCODE) { throw 'Signing failed' }
 Remove-Item -LiteralPath $stage -Recurse -Force
 New-Item -ItemType Directory -Force (Join-Path $Out 'Dependencies') | Out-Null
 Copy-Item -LiteralPath $vclibs -Destination (Join-Path $Out 'Dependencies')
-$zip=Join-Path $Out "GodOfWar3Launcher-$version.zip"
+$zip=Join-Path $Out "GOW3xbox$version.zip"
 Compress-Archive -Path $package,(Join-Path $Out 'Dependencies') -DestinationPath $zip
 New-Item -ItemType Directory -Force $local | Out-Null
 [IO.File]::WriteAllText((Join-Path $local 'latest-package.txt'),$package,[Text.UTF8Encoding]::new($false))
