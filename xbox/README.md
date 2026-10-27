@@ -1,5 +1,9 @@
 # God of War III for Xbox
 
+**Published release: Beta 0 (1.0.26300.308).** The .436 release was removed.
+Its later first-start preparation entries below are historical experiments,
+not features of the published Beta 0 binary. See [the full report](../MODIFICATIONS.md).
+
 The Xbox app of this fork: God of War III Remastered on the Xbox Series X|S in Developer Mode,
 maintained here by dvine99, forked from **Devran Cosmo Uenal’s
 [gow3_xbox](https://github.com/Cosmo/gow3_xbox)**, itself a fork of

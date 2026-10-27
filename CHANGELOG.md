@@ -4,9 +4,11 @@ As versões abaixo pertencem ao **GOW3Xsuper**. São prereleases experimentais d
 fork de [Devran Cosmo Uenal](https://github.com/Cosmo/gow3_xbox), derivado do
 [SpartanPort](https://github.com/FelipePrado0/SpartanPort).
 
-## 1.0.26300.436 — 27/10/2026 — Alpha atual
+## 1.0.26300.436 — 27/10/2026 — Retirada
 
-[Release e download](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0436)
+Release e anexos excluídos a pedido do mantenedor. O registro abaixo descreve
+trabalho histórico; estas mudanças não fazem parte da Beta 0. O histórico Git
+foi preservado para rastreabilidade.
 
 - Retorno à base própria **1.0.26300.308**, revertendo as mudanças da .343.
 - Preparação automática de biblioteca ausente/incompatível no início normal.
@@ -29,7 +31,10 @@ O mantenedor relatou falha e solicitou desconsiderar esta versão. As alteraçõ
 foram revertidas na linha atual; **não há download recomendado desta versão**.
 O histórico permanece no Git para rastreabilidade.
 
-## 1.0.26300.308 — 27/10/2026 — Base anterior mantida
+## Beta 0 — 1.0.26300.308 — 27/10/2026 — Versão publicada atual
+
+A antiga release “base anterior” foi renomeada para **Beta 0**. O pacote, a
+versão interna e o checksum permanecem os mesmos; não houve recompilação.
 
 [Release e download](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0308)
 

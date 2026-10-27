@@ -51,7 +51,7 @@ ou da Santa Monica Studio. God of War pertence aos respectivos titulares.
 | Identidade visual | Nome de exibição **God of War III**, logo na inicialização e nova capa com variantes de resolução para os tiles do Xbox. |
 | Configurações | 13 controles avançados para caminhos já existentes de gravação, cópias, memória, cache e diagnósticos. |
 | Profiling | Correções na coleta de frame pacing, p95/p99, memória e esperas; analisador de logs para comparação. |
-| Primeiro início | Na versão 1.0.26300.436, preparação da biblioteca de shaders, aquecimento de conversores de texturas e pipelines registrados; início normal aguarda compilações necessárias. |
+| Histórico experimental | Tentativas posteriores de preparação do primeiro início estão documentadas no relatório; as versões .343 e .436 foram retiradas da distribuição. |
 | Distribuição | Workflow Windows/UWP com testes, recursos de imagem, empacotamento, assinatura de teste e ZIP no padrão **GOW3xbox<versão>.zip**. |
 
 Consulte o [inventário detalhado](MODIFICATIONS.md), incluindo recursos herdados,
@@ -62,11 +62,10 @@ os diálogos, áudio ou textos fornecidos pelos arquivos do jogo**.
 
 | Versão | Situação | Download |
 | --- | --- | --- |
-| **1.0.26300.436** | Alpha atual; preparação para o primeiro início, baseada na .308 | [GOW3xbox1.0.26300.436.zip](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0436) |
-| **1.0.26300.308** | Versão anterior mantida como referência e alternativa | [GOW3xbox1.0.26300.308.zip](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0308) |
+| **Beta 0 — 1.0.26300.308** | Versão publicada atual | [GOW3xbox1.0.26300.308.zip](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0308) |
 
-A versão **1.0.26300.343 foi retirada** após relato de falha; suas mudanças foram
-revertidas. Não a utilizamos como base atual. Todas as versões válidas ficam em
+As versões **1.0.26300.343 e 1.0.26300.436 foram retiradas**. A Beta 0 corresponde
+ao pacote original da .308, sem incorporar essas experiências posteriores. As versões publicadas ficam em
 **[Releases do GOW3Xsuper](https://github.com/dvine99/GOW3Xsuper/releases)**.
 Veja [como publicamos versões](RELEASES.md) e o [histórico](CHANGELOG.md).
 
@@ -81,13 +80,12 @@ Veja [como publicamos versões](RELEASES.md) e o [histórico](CHANGELOG.md).
    `\dumps\GodOfWar3` no USB e até três níveis abaixo de `D:\DevelopmentFiles`;
    use **Escolher pasta do jogo** se necessário.
 5. Abra **God of War III**, escolha seu idioma e execute **Preparar** na primeira
-   utilização. Na **1.0.26300.436**, use **Pré-compilar shaders** para antecipar a
-   preparação, depois **Iniciar jogo**. O início normal também tenta preparar uma
-   biblioteca ausente ou incompatível automaticamente.
+   utilização. Na **Beta 0**, use **Pré-compilar shaders** para antecipar a
+   preparação, depois **Iniciar jogo**, que carrega o cache de shaders registrado.
 
 Aguarde a preparação terminar. Shaders e estados ainda desconhecidos podem
-compilar durante o jogo. **Início rápido (pode omitir gráficos)** é uma alternativa
-experimental que pode descartar desenhos enquanto a compilação está pendente;
+compilar durante o jogo. **Iniciar jogo sem carregar shaders** é uma alternativa
+que pode omitir gráficos enquanto a compilação está pendente;
 para testar o primeiro boot, prefira o início normal.
 
 Durante o jogo, **RS + LT** abre o menu. A resolução padrão é 720p. Os controles
@@ -97,13 +95,13 @@ sobre a instalação existente e manutenção dos dados.
 
 ## Estado atual e problemas conhecidos
 
-- As duas versões publicadas passaram pela compilação Windows/UWP, empacotamento
+- A Beta 0 passou pela compilação Windows/UWP, empacotamento
   e verificação dos arquivos. Isso não substitui testes no console.
 - Há relatos de texturas/letras corrompidas no primeiro boot, ghosting e stuttering.
-  A .436 aborda desenhos omitidos durante compilação, mas **a correção visual da
-  cena relatada ainda precisa ser confirmada no Xbox**.
-- Não há ganho de FPS medido deste fork. Preparar mais shaders pode alongar o
-  carregamento; aguardar compilações pode causar pausas durante o jogo.
+  **A Beta 0 não contém as tentativas de correção da .436, e a correção visual da
+  cena relatada não está confirmada no Xbox**.
+- Não há ganho de FPS medido deste fork. Preparar shaders pode alongar o
+  carregamento, e novas compilações podem causar pausas durante o jogo.
 - Memória é limitada no Developer Mode; resoluções altas aumentam a pressão.
   FSR e resolução dinâmica não foram habilitados como recursos funcionais no Xbox.
 

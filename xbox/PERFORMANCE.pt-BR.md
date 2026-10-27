@@ -1,5 +1,10 @@
 # Desempenho no Xbox — controles e diagnóstico do GOW3Xsuper
 
+**Distribuição atual: Beta 0 (1.0.26300.308).** A Release .436 foi excluída.
+As seções sobre preparação do primeiro início na .436 são histórico de um
+experimento retirado e não descrevem o binário Beta 0. Veja o
+[relatório completo](../MODIFICATIONS.md).
+
 Base: `alpha-1.0.26299.2139`, commit
 `fe8c66ed3a9bf151557c8f0af57009bdc955b042` de `Cosmo/gow3_xbox`.
 
@@ -7,8 +12,8 @@ Esta alteração integra controles de desempenho existentes ao menu e corrige a
 coleta de métricas. Não há benchmark de gameplay desta alteração: o sandbox
 Linux não tem Xbox, SDK do Windows, Dozen em execução nem dump/save do jogo.
 Não foi medida uma melhora de FPS. As versões próprias .308 e .436 já têm
-pacotes Windows/UWP compilados, assinados e verificados, disponíveis em
-[Releases](../RELEASES.md); a validação no console é separada.
+pacotes Windows/UWP compilados, assinados e verificados. Apenas a Beta 0 (.308)
+continua disponível em [Releases](../RELEASES.md); a validação no console é separada.
 
 ## Menu
 
