@@ -943,5 +943,10 @@
     "Screenshot saved: {}",
     "Captura salva: {}",
     "Captura guardada: {}"
+  ],
+  [
+    "Used by Fast start. Normal Start game waits for required shaders to preserve texture updates.",
+    "Usado no Início rápido. Iniciar jogo aguarda os shaders necessários para preservar as atualizações de texturas.",
+    "Se usa en Inicio rápido. Iniciar juego espera los shaders necesarios para conservar las actualizaciones de texturas."
   ]
 ]

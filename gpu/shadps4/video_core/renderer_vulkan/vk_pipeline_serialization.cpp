@@ -1327,14 +1327,7 @@ void PipelineCache::PumpWarmUp() {
     SpartanOverlay::SetBackgroundLoading(done, std::max(warm.total.load(), done));
 
     static const std::array<Shader::RuntimeInfo, MaxShaderStages> no_runtime_infos{};
-    // Creating shader modules and merging their metadata runs on the GPU thread.
-    // Keep Xbox batches small during gameplay; the blocking loading screen is unchanged.
-#ifdef GOW3_UWP
-    constexpr unsigned read_batch = 2;
-#else
-    constexpr unsigned read_batch = 32;
-#endif
-    for (auto& entry : warm.read.Take(read_batch)) {
+    for (auto& entry : warm.read.Take(32)) {
         warm.read_queue_ns += ElapsedNs(entry.queued);
         if (entry.compute ? compute_pipelines.contains(entry.compute_key)
                           : graphics_pipelines.contains(entry.graphics_key)) {

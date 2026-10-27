@@ -25,6 +25,9 @@ class TemplateWriter {
     struct State;
     std::unique_ptr<State> state;
 };
+// Checks complete, profile-compatible fragment and vertex indexes. Records are
+// still individually validated against live code/descriptors on actual use.
+bool PreparedLibraryReady(const std::filesystem::path& cache, const Shader::Profile& profile);
 bool TemplatesReady(const std::filesystem::path& cache, const Shader::Profile& profile, u64 library,
                     u32& entries);
 std::vector<Shader::Backend::Bindings> TemplateBindingVariants(const std::filesystem::path& cache,

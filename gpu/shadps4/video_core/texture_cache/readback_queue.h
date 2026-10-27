@@ -15,7 +15,7 @@ public:
         std::uint64_t address, size, tick;
         Payload payload;
         bool valid = true;
-        bool watched = true; ///< protects pages until retirement or cancellation
+        bool watched = true; ///< still protects its pages (see ReleaseOutside)
     };
     bool CanFit(std::uint64_t size) const {
         return entries.size() < 64 && size <= MaxBytes && bytes <= MaxBytes - size;
@@ -40,6 +40,24 @@ public:
                 entry.valid = false;
             }
         }
+    }
+    /// spartanport: a CPU access to [address, address + size) that shares pages with small copies but
+    /// not their bytes stops waiting for them: each such copy is unwatched (`release` drops its
+    /// page protection) and still published when the GPU is done. Returns the copies released.
+    template <typename Release>
+    unsigned ReleaseOutside(std::uint64_t address, std::uint64_t size, std::uint64_t max_size,
+                            Release&& release) {
+        unsigned released = 0;
+        for (auto& entry : entries) {
+            if (entry.valid && entry.watched && entry.size <= max_size &&
+                OverlapsPage(entry, address, size) &&
+                !(address < entry.address + entry.size && entry.address < address + size)) {
+                release(entry);
+                entry.watched = false;
+                ++released;
+            }
+        }
+        return released;
     }
     template <typename Ready, typename Complete>
     void Retire(Ready&& ready, Complete&& complete) {

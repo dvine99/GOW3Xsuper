@@ -166,7 +166,14 @@ jobs:
              dxc_root = "$env:RUNNER_TEMP\dxc" } | ConvertTo-Json | Set-Content xbox\.local\settings.json
 
       - name: Build
-        run: .\xbox\scripts\build.ps1 -Graphics
+        run: |
+          .\xbox\scripts\build.ps1 -Graphics
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build xbox/.local/build --target spartanport-offline-shader --parallel 4
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $env:PATH = "$(Resolve-Path xbox/.local/build/layout);$env:PATH"
+          & ./xbox/.local/build/gpu/spartanport-offline-shader.exe selftest
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
       - name: Package
         id: package

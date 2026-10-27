@@ -131,9 +131,13 @@ bool TextureCache::ResolveReadbacks(VAddr address, u64 size, bool assume_locks,
     if (!deferred_readbacks || !has_pending_readbacks.load(std::memory_order_acquire)) return false;
     {
         std::scoped_lock lock{readback_mutex};
-        // Protection is page-granular: even a write outside the copied bytes must
-        // retire the copy before releasing its page. Otherwise a subsequent CPU write
-        // to those bytes is invisible and the late GPU copy can overwrite it.
+        // Stale mode, byte rule: SpartanPort writes every frame to the page that holds a
+        // 1x1 exposure copy, but not to its bytes. That write need not wait for the GPU: the
+        // copy only stops protecting its page and is still published when the GPU is done.
+        if (stale_readbacks && source == ReadbackSource::CpuWrite) {
+            readbacks_released += pending_readbacks.ReleaseOutside(address, size, 64_KB,
+                [this](auto& entry) { WatchReadback<false>(entry.address, entry.size); });
+        }
         if (!pending_readbacks.RequiredTick(address, size)) return false;
     }
     const auto resolve = [this, address, size, source] {

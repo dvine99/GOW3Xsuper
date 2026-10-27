@@ -1,5 +1,5 @@
 #requires -Version 7.2
-# The installable package of the build: GodOfWarIII_<version>_x64.appx, signed with signing/gow3_xbox-signing.pfx,
+# The installable package of the build: GodOfWar3Launcher_<version>_x64.appx, signed with signing/gow3_xbox-signing.pfx,
 # the public self-signed test key for the manifest's publisher CN=gow3_xbox (README.md), the VCLibs framework package it
 # needs in Dependencies, and both in GOW3xbox<version>.zip for a release. The version is the time in UTC, so
 # every package, from any machine or from GitHub, installs over the previous one and keeps the app's data.
@@ -45,7 +45,7 @@ Remove-Item -LiteralPath (Join-Path $stage 'resources.pri') -ErrorAction Silentl
 & "$sdk/makepri.exe" new /pr $stage /cf $priConfig /mn $manifest /of (Join-Path $stage 'resources.pri') /o *> (Join-Path $Out 'pri-index.log')
 if($LASTEXITCODE) { Get-Content (Join-Path $Out 'pri-index.log') -Tail 12; throw 'Resource indexing failed' }
 if(!(Test-Path -LiteralPath (Join-Path $stage 'resources.pri'))) { throw 'Resource index missing' }
-$package=Join-Path $Out "GodOfWarIII_$version`_x64.appx"
+$package=Join-Path $Out "GodOfWar3Launcher_$version`_x64.appx"
 & "$sdk/makeappx.exe" pack /d $stage /p $package /o *> (Join-Path $Out 'pack.log')
 if($LASTEXITCODE) { Get-Content (Join-Path $Out 'pack.log') -Tail 12; throw 'Package creation failed' }
 & "$sdk/signtool.exe" sign /q /fd SHA256 /f (Join-Path $root 'signing/gow3_xbox-signing.pfx') $package

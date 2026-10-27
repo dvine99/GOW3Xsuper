@@ -135,6 +135,9 @@ public:
     /// the results a few at a time (PumpWarmUp). False when it cannot (zip archive store).
     bool StartBackgroundWarmUp();
     void StartOnDemand();
+    /// Xbox normal startup must preserve draws that populate persistent textures.
+    /// Only the explicit fast-start option permits skipping a pending compilation.
+    void AllowPendingDrawSkip(bool allow) { allow_pending_draw_skip = allow; }
     void Sync();
     void ReportCompilerStats();
 
@@ -230,6 +233,11 @@ private:
 #endif
     std::unique_ptr<AsyncCompiler> compiler, capture_compiler;
     std::vector<vk::UniquePipelineCache> worker_pipeline_caches;
+#ifdef GOW3_UWP
+    bool allow_pending_draw_skip = false;
+#else
+    bool allow_pending_draw_skip = true;
+#endif
     bool worker_caches_seeded = false;
     size_t driver_cache_size = 0; ///< pipeline_cache data size when last loaded or saved
     /// spartanport: SPARTAN_PARALLEL_WARMUP: WarmUp builds the cached pipelines on these threads.

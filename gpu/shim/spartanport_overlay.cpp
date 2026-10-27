@@ -514,7 +514,12 @@ void PerformanceTab() {
         ChoiceRow("Frames queued", s.frames_queued, queued_labels, G::FramesQueued.data(),
                   int(G::FramesQueued.size()), "More frames queued: steadier FPS, slower response to input.");
         CheckRow("Compile new shaders in the background", s.async_shaders,
-                 "Fewer stutters in new areas; an object or effect may appear a moment later.");
+#ifdef GOW3_UWP
+                 "Used by Fast start. Normal Start game waits for required shaders to preserve texture updates."
+#else
+                 "Fewer stutters in new areas; an object or effect may appear a moment later."
+#endif
+        );
         ImGui::EndTable();
     }
 #ifdef GOW3_UWP

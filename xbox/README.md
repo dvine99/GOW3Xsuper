@@ -628,17 +628,29 @@ keyboard fallback. This does not replace an in-game save/reload check on Xbox.
 
 ### Launcher shader preparation
 
-Normal boot now opens a controller/keyboard launcher before starting the game.
-Choose **Start game** or **Precompile shaders** using D-pad/arrow keys and A/Enter.
-Preparation displays scanning and compilation progress, then returns to the
-launcher with the prepared count. Unsupported shaders compile during gameplay.
+Normal boot opens a controller/keyboard launcher before starting the game.
+**Start game** prepares a missing or incompatible fragment/vertex template library
+on the target GPU profile, then prepares ten common texture upload converters
+(1D/2D thin, 8/16/32/64/128 bits) and loads previously recorded pipelines before
+starting the guest. A compatible complete library is reused on later launches.
+**Precompile shaders** performs the same preparation explicitly and returns to the
+menu. Repeating it in the same launch reuses the device pipelines already built.
+Progress remains visible during each stage. Preparation can take several minutes.
 
-The current CUSA01715 subset covers 154 resource-free fragment shader identities
-(40 distinct programs), including asset-derived input linkage. It checks three
-attachment variants per identity and reuses valid saved results on later runs.
-Textured fragments and vertex shaders are skipped. Preparation is native C++;
-no Python installation or prior playthrough is needed. See
-`tools/offline_shaders/README.md` for count definitions and validation.
+Normal Xbox startup compiles any missing live shader/pipeline synchronously rather
+than discarding its draw. This preserves one-time offscreen writes that may produce
+textures used later. It can stall on live variants absent from the prepared library,
+especially on the first run. **Fast start (may miss graphics)** explicitly retains
+the earlier asynchronous draw-skipping behavior when background shader compilation
+is enabled; it is unsuitable for diagnosing first-boot texture correctness.
+The in-game background-compilation option applies to that fast-start mode on Xbox.
+Readback synchronization and compiler queue scheduling match version1.0.26300.308.
+
+The native preparer covers asset-derived fragment and vertex templates as described
+in `tools/offline_shaders/README.md`. This prepares GCN-to-SPIR-V translation,
+not every possible driver pipeline state. With an empty gameplay cache, new driver
+states still compile on their first use; no complete first-run PSO inventory is
+invented. No console visual or frame-rate improvement is established by a build.
 
 Results are app-local at `user/shader/precompiled/CUSA01715`. Runtime lookup
 requires matching code, specialization and renderer profile; a miss or invalid

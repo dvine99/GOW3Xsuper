@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #pragma once
 
-#include <algorithm>
 #include <chrono>
 #include <atomic>
 #include <cstdint>
@@ -37,12 +36,7 @@ public:
                         if (tasks.empty() && urgent.empty()) {
                             return;
                         }
-                        // Shaders feed pipelines, but an unbounded shader burst must not
-                        // starve already-ready pipeline builds. Shared across workers.
-                        const bool take_urgent = !urgent.empty() &&
-                            (tasks.empty() || urgent_streak < 4);
-                        urgent_streak = take_urgent ? std::min(urgent_streak + 1, 4u) : 0;
-                        auto& queue = take_urgent ? urgent : tasks;
+                        auto& queue = urgent.empty() ? tasks : urgent;
                         auto next = std::move(queue.front());
                         queue.pop_front();
                         queue_wait_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -99,7 +93,6 @@ private:
         std::chrono::steady_clock::time_point enqueued;
     };
     std::deque<Task> tasks, urgent;
-    unsigned urgent_streak = 0;
     static inline thread_local unsigned worker_index = 0;
     std::atomic<uint64_t> queue_wait_ns{};
     bool stopping = false;

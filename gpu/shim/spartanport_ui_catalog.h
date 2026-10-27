@@ -5,7 +5,7 @@
 #include <string_view>
 namespace SpartanUi {
 struct Entry { const char* en; const char* pt; const char* es; };
-inline constexpr std::array<Entry, 189> Catalog = {{
+inline constexpr std::array<Entry, 190> Catalog = {{
     {"\n\nCopy the dump to a USB drive and choose it there.", "\n\nCopie o dump para uma unidade USB e selecione a pasta nela.", "\n\nCopia el dump a una unidad USB y elige allí la carpeta."},
     {"\n\nStart the app again to play from this folder.", "\n\nReabra o app para jogar a partir desta pasta.", "\n\nVuelve a abrir la app para jugar desde esta carpeta."},
     {"(nothing selected)", "(nada selecionado)", "(nada seleccionado)"},
@@ -176,6 +176,7 @@ inline constexpr std::array<Entry, 189> Catalog = {{
     {"Unlock Very Hard", "Liberar Muito Difícil", "Desbloquear Muy difícil"},
     {"Upload buffer memory", "Memória dos buffers de transferência", "Memoria de los búferes de transferencia"},
     {"Upscaler", "Ampliação de imagem", "Escalado de imagen"},
+    {"Used by Fast start. Normal Start game waits for required shaders to preserve texture updates.", "Usado no Início rápido. Iniciar jogo aguarda os shaders necessários para preservar as atualizações de texturas.", "Se usa en Inicio rápido. Iniciar juego espera los shaders necesarios para conservar las actualizaciones de texturas."},
     {"Uses multiple CPU workers to prepare saved pipelines before gameplay.", "Usa vários workers da CPU para preparar pipelines salvos antes do jogo.", "Usa varios hilos de CPU para preparar pipelines guardados antes del juego."},
     {"VRAM (used / available)", "VRAM (usada / disponível)", "VRAM (usada / disponible)"},
     {"Vibration", "Vibração", "Vibración"},

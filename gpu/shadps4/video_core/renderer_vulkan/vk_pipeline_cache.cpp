@@ -660,7 +660,8 @@ void PipelineCache::FinishCompilations() {
 }
 
 bool PipelineCache::AsyncCompilation() const {
-    return compiler && SpartanSettings::Get().async_shaders.load(std::memory_order_relaxed);
+    return allow_pending_draw_skip && compiler &&
+           SpartanSettings::Get().async_shaders.load(std::memory_order_relaxed);
 }
 
 void PipelineCache::SeedWorkerCaches() {

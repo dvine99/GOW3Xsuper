@@ -15,11 +15,11 @@ inline int Normalize(int language) { return language >= 0 && language < int(Code
 enum class Key {
     Start, StartOnDemand, Precompile, ChooseFolder, Language, Back, Browse, Current,
     Folder, Internal, Usb, FolderHelp, Scanning, Vertex, Fragment, Prepared, SomeFailed,
-    Failed, NoFolder, LoadingCache, PreparingGraphics, Controls, LanguageHelp, Count
+    Failed, NoFolder, LoadingCache, PreparingGraphics, Controls, LanguageHelp, PreparingTextures, StartupHelp, Count
 };
 inline constexpr std::array<std::array<const char*, 3>, size_t(Key::Count)> Text = {{
     {"Start game", "Iniciar jogo", "Iniciar juego"},
-    {"Start game without loading shaders", "Iniciar jogo sem carregar shaders", "Iniciar juego sin cargar shaders"},
+    {"Fast start (may miss graphics)", "Início rápido (pode omitir gráficos)", "Inicio rápido (puede omitir gráficos)"},
     {"Precompile shaders", "Pré-compilar shaders", "Precompilar shaders"},
     {"Choose game folder", "Escolher pasta do jogo", "Elegir carpeta del juego"},
     {"Language", "Idioma", "Idioma"},
@@ -47,6 +47,10 @@ inline constexpr std::array<std::array<const char*, 3>, size_t(Key::Count)> Text
     {"App interface language: menus, settings and messages.",
      "Idioma da interface do app: menus, configurações e mensagens.",
      "Idioma de la interfaz de la app: menús, ajustes y mensajes."},
+    {"Preparing texture uploads...", "Preparando envio de texturas...", "Preparando carga de texturas..."},
+    {"Start game prepares missing shaders and waits for required graphics. First preparation can take several minutes.",
+     "Iniciar jogo prepara os shaders ausentes e aguarda os gráficos necessários. A primeira preparação pode levar vários minutos.",
+     "Iniciar juego prepara los shaders ausentes y espera los gráficos necesarios. La primera preparación puede tardar varios minutos."},
 }};
 inline const char* Get(Key key, int language) { return Text[size_t(key)][Normalize(language)]; }
 } // namespace SpartanLauncherText
