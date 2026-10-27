@@ -237,9 +237,8 @@ int RunOfflineShaderChecks() {
     current = baseline;
     current.offline_descriptor_snapshot = true;
     require(!TryTemplate(directory, 1011, 789, current, runtime, profile, result));
-    std::filesystem::remove(directory / "templates.gtp");
-    std::filesystem::remove(directory / "templates.gti");
-    std::filesystem::remove(directory);
+    // This test owns a unique temporary tree, including the new vertex fixture.
+    std::filesystem::remove_all(directory);
     std::puts("PASS: bounded asset descriptors, fetch semantics, template "
               "constants and invalid-input fallback");
     return 0;
