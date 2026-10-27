@@ -75,6 +75,22 @@ int main() {
         assert(compiler.QueueWaitNs() > 0);
     }
     {
+        AsyncCompiler compiler(1, 16);
+        std::promise<void> entered, release;
+        auto gate = release.get_future().share();
+        std::vector<int> order;
+        assert(compiler.Submit([&] { entered.set_value(); gate.wait(); }));
+        entered.get_future().wait();
+        assert(compiler.Submit([&] { order.push_back(100); }));
+        assert(compiler.Submit([&] { order.push_back(101); }));
+        for (int i = 0; i < 10; ++i) {
+            assert(compiler.Submit([&, i] { order.push_back(i); }, true));
+        }
+        release.set_value();
+        compiler.Stop();
+        assert((order == std::vector<int>{0, 1, 2, 3, 100, 4, 5, 6, 7, 101, 8, 9}));
+    }
+    {
         std::atomic<unsigned> initialized{};
         AsyncCompiler compiler(2, 4, [&](unsigned) { ++initialized; });
         std::promise<void> entered[2], release;

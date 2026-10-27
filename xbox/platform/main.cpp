@@ -786,6 +786,9 @@ struct View : winrt::implements<View,winrt::Windows::ApplicationModel::Core::IFr
         });
     }
     void SetWindow(winrt::Windows::UI::Core::CoreWindow const& value) {
+        // Use the manifest display name; setting a document Title can append it twice.
+        std::printf("UWP package display name: %s\n",
+            winrt::to_string(winrt::Windows::ApplicationModel::Package::Current().DisplayName()).c_str());
         window=value; window.Closed([](auto const&,auto const&) {
             if(!finished.load()) { std::puts("UWP lifecycle: window closed"); std::fflush(stdout); }
             window_closed=true;

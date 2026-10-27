@@ -130,3 +130,29 @@ histograma, pausas longas e agregação dos logs. O teste das opções é compil
 com e sem `GOW3_UWP`; isso valida a lógica de configuração, não as APIs do Xbox.
 A build completa Windows/UWP, navegação visual por controle e benchmarks no
 console continuam obrigatórios antes de distribuir uma release com estas mudanças.
+
+
+## Correção de coerência e distribuição da compilação
+
+- Readbacks pendentes mantêm a proteção da página até terminar ou serem cancelados.
+  Antes, uma escrita vizinha a uma cópia pequena podia retirar essa proteção e uma
+  escrita posterior aos bytes copiados podia ser sobrescrita pela GPU. Agora a
+  primeira escrita aguarda a cópia; isso preserva a promessa de não perder escritas
+  da CPU, mas pode aumentar a espera em páginas compartilhadas. A leitura da cópia
+  anterior continua sendo uma opção independente.
+- A fila de compilação dá preferência aos shaders, mas atende um pipeline normal
+  após no máximo quatro trabalhos prioritários consecutivos quando ambos aguardam.
+  Evita que novos shaders adiem indefinidamente os pipelines já prontos para compilar.
+- Durante o aquecimento em segundo plano no Xbox, cada lote de 4 ms incorpora até
+  dois registros de pipelines, em vez de 32, reduzindo o trabalho de criação de
+  módulos na thread gráfica por lote. A pré-compilação na tela de carregamento
+  mantém seu comportamento; a preparação em segundo plano pode demorar mais.
+- O pacote expõe **God of War III** também como nome curto do bloco; o arquivo de
+  instalação é `GodOfWarIII_<versão>_x64.appx`. A identidade interna é preservada
+  para instalar como atualização e manter saves. O log registra o nome recebido
+  do sistema em `UWP package display name`.
+
+Estas correções não estabelecem um ganho de FPS medido nem comprovam a resolução
+visual de todas as texturas. Compare a mesma cena no console, com os mesmos ajustes,
+registrando `loader.log`, FPS e p95/p99. Depois da atualização, reinicie o console
+se o painel ainda mostrar o nome antigo; confira a versão instalada antes de testar.
