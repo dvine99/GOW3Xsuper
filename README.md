@@ -1,116 +1,116 @@
-# God of War III — port experimental para Xbox
+# God of War III — experimental Xbox port
 
-**GOW3Xsuper é um fork comunitário mantido por [dvine99](https://github.com/dvine99).**
-Executa **God of War III Remastered no Xbox Series X|S em Modo de Desenvolvedor**,
-a partir de um dump do próprio jogador. **Não é compatível com Xbox One.**
+**GOW3Xsuper is a community fork maintained by [dvine99](https://github.com/dvine99).**
+It runs **God of War III Remastered on Xbox Series X|S in Developer Mode**,
+using the player's own dump. **Xbox One is not supported.**
 
-[Baixar versões próprias](https://github.com/dvine99/GOW3Xsuper/releases) ·
-[Modificações mantidas](MODIFICATIONS.md) · [Histórico](CHANGELOG.md) ·
-[Créditos completos](xbox/CREDITS.md) · [Compilar o port](xbox/README.md)
+[Download our releases](https://github.com/dvine99/GOW3Xsuper/releases) ·
+[Maintained modifications](MODIFICATIONS.md) · [Changelog](CHANGELOG.md) ·
+[Full credits](xbox/CREDITS.md) · [Build the port](xbox/README.md)
 
-![Capa do aplicativo](xbox/assets/CoverSource.png)
+![App cover](xbox/assets/CoverSource.png)
 
-## Origem: um fork de outro fork
+## Origins: a fork of a fork
 
 ```text
-SpartanPort — Felipe Prado e colaboradores
+SpartanPort — Felipe Prado and contributors
 └── gow3_xbox — Devran Cosmo Uenal (Cosmo)
-    └── GOW3Xsuper — manutenção e adaptações de dvine99
+    └── GOW3Xsuper — maintenance and adaptations by dvine99
 ```
 
-- **[SpartanPort](https://github.com/FelipePrado0/SpartanPort)**, anteriormente
-  `gow3_pc`: projeto de Felipe Prado e colaboradores que fornece a base para PC,
-  incluindo loader, runtime, integração gráfica, menus e patches.
-- **[gow3_xbox](https://github.com/Cosmo/gow3_xbox)**: fork de
-  **[Devran Cosmo Uenal](https://github.com/Cosmo)** que adapta essa base ao Xbox.
-  Este é o **projeto de origem direto** do nosso repositório. O port para Xbox e
-  seu trabalho de integração são creditados a ele e aos colaboradores upstream.
-- **[GOW3Xsuper](https://github.com/dvine99/GOW3Xsuper)**: nosso fork desse port,
-  com as modificações descritas abaixo. Não reivindicamos autoria das bases herdadas.
+- **[SpartanPort](https://github.com/FelipePrado0/SpartanPort)**, formerly
+  `gow3_pc`: Felipe Prado and contributors' PC foundation, including the loader,
+  runtime, graphics integration, menus and patches.
+- **[gow3_xbox](https://github.com/Cosmo/gow3_xbox)**: the fork by
+  **[Devran Cosmo Uenal](https://github.com/Cosmo)** that adapts that foundation
+  to Xbox. It is our repository's **immediate upstream**. Credit for the Xbox
+  port and its integration belongs to him and the upstream contributors.
+- **[GOW3Xsuper](https://github.com/dvine99/GOW3Xsuper)**: our fork of that port,
+  with the changes described below. We do not claim authorship of the inherited work.
 
-Também dependemos de bloodborne_pc, shadPS4, Mesa/Dozen e outros projetos.
-A relação de autores, componentes e licenças está em [Créditos](xbox/CREDITS.md).
+We also depend on bloodborne_pc, shadPS4, Mesa/Dozen and other projects.
+See [Credits](xbox/CREDITS.md) for their authors, components and licenses.
 
-## O que é este port?
+## What is this port?
 
-É um aplicativo **UWP experimental para o Developer Mode**. O loader e o runtime
-executam o código do dump de PS4; a camada gráfica derivada do shadPS4 traduz os
-shaders e comandos para Vulkan, e **Mesa/Dozen traduz Vulkan para Direct3D 12**
-no Xbox. Não é uma edição comercial nativa de God of War para Xbox.
+This is an **experimental UWP application for Developer Mode**. Its loader and
+runtime execute code from a PS4 dump; the graphics layer derived from shadPS4
+translates shaders and commands to Vulkan, and **Mesa/Dozen translates Vulkan
+to Direct3D 12** on Xbox. It is not a native commercial Xbox edition of God of War.
 
-**Nenhum arquivo do jogo é distribuído.** Você precisa do seu próprio dump de
-God of War III Remastered; o dump de referência do projeto é **CUSA01715**.
-Este projeto não tem afiliação ou aprovação da Sony Interactive Entertainment
-ou da Santa Monica Studio. God of War pertence aos respectivos titulares.
+**No game files are distributed.** You need your own dump of God of War III
+Remastered; the project's reference dump is **CUSA01715**. This project is not
+affiliated with or endorsed by Sony Interactive Entertainment or Santa Monica
+Studio. God of War belongs to its respective rights holders.
 
-## O que modificamos e mantemos
+## What we modify and maintain
 
-| Área | Trabalho deste fork |
+| Area | Work in this fork |
 | --- | --- |
-| Interface | Português brasileiro, espanhol e inglês, com escolha persistente no menu inicial e nas configurações; tradução dos textos controlados pelo aplicativo. |
-| Identidade visual | Nome de exibição **God of War III**, logo na inicialização e nova capa com variantes de resolução para os tiles do Xbox. |
-| Configurações | 13 controles avançados para caminhos já existentes de gravação, cópias, memória, cache e diagnósticos. |
-| Profiling | Correções na coleta de frame pacing, p95/p99, memória e esperas; analisador de logs para comparação. |
-| Histórico experimental | Tentativas posteriores de preparação do primeiro início estão documentadas no relatório; as versões .343 e .436 foram retiradas da distribuição. |
-| Distribuição | Workflow Windows/UWP com testes, recursos de imagem, empacotamento, assinatura de teste e ZIP no padrão **GOW3xbox<versão>.zip**. |
+| Interface | Brazilian Portuguese, Spanish and English, with a persistent selection in the startup menu and settings; translations cover app-owned text. |
+| Visual identity | **God of War III** display name, startup logo and new cover with resolution variants for Xbox tiles. |
+| Settings | 13 advanced controls for existing recording, copying, memory, cache and diagnostic paths. |
+| Profiling | Corrections to frame pacing, p95/p99, memory and wait reporting; a log analyzer for comparisons. |
+| Experimental history | Later attempts to improve first-start preparation are documented in the report; versions .343 and .436 were withdrawn from distribution. |
+| Distribution | Windows/UWP workflow with tests, image resources, packaging, test signing and ZIPs named **GOW3xbox<version>.zip**. |
 
-Consulte o [inventário detalhado](MODIFICATIONS.md), incluindo recursos herdados,
-limitações e as alterações retiradas. A tradução da interface do app **não traduz
-os diálogos, áudio ou textos fornecidos pelos arquivos do jogo**.
+See the [detailed inventory](MODIFICATIONS.md), including inherited features,
+limitations and withdrawn changes. App interface localization **does not translate
+dialogue, audio or text supplied by the game files**.
 
-## Releases deste fork
+## Releases from this fork
 
-| Versão | Situação | Download |
+| Version | Status | Download |
 | --- | --- | --- |
-| **Beta 0 — 1.0.26300.308** | Versão publicada atual | [GOW3xbox1.0.26300.308.zip](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0308) |
+| **Beta 0 — 1.0.26300.308** | Current published release | [GOW3xbox1.0.26300.308.zip](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0308) |
 
-As versões **1.0.26300.343 e 1.0.26300.436 foram retiradas**. A Beta 0 corresponde
-ao pacote original da .308, sem incorporar essas experiências posteriores. As versões publicadas ficam em
-**[Releases do GOW3Xsuper](https://github.com/dvine99/GOW3Xsuper/releases)**.
-Veja [como publicamos versões](RELEASES.md) e o [histórico](CHANGELOG.md).
+Versions **1.0.26300.343 and 1.0.26300.436 were withdrawn**. Beta 0 is the original
+.308 package and does not include those later experiments. Published versions are
+available in **[GOW3Xsuper Releases](https://github.com/dvine99/GOW3Xsuper/releases)**.
+See [how we publish releases](RELEASES.md) and the [changelog](CHANGELOG.md).
 
-## Instalação no Xbox Series X|S
+## Installation on Xbox Series X|S
 
-1. Ative o **Modo de Desenvolvedor** e abra o **Xbox Device Portal** pelo PC.
-2. Baixe o ZIP da versão desejada em Releases e extraia no PC.
-3. Em **Add**, instale o `.appx` e a dependência da pasta `Dependencies`.
-   Se o Dev Home o listar como aplicativo, altere o tipo para **Game**.
-4. Copie seu dump — pasta com `eboot.bin`, `sce_module`, `sce_sys` e `dvdroot_ps4` —
-   para USB ou para `D:\DevelopmentFiles` no console. A busca automática procura
-   `\dumps\GodOfWar3` no USB e até três níveis abaixo de `D:\DevelopmentFiles`;
-   use **Escolher pasta do jogo** se necessário.
-5. Abra **God of War III**, escolha seu idioma e execute **Preparar** na primeira
-   utilização. Na **Beta 0**, use **Pré-compilar shaders** para antecipar a
-   preparação, depois **Iniciar jogo**, que carrega o cache de shaders registrado.
+1. Enable **Developer Mode** and open **Xbox Device Portal** from your PC.
+2. Download the desired release ZIP and extract it on your PC.
+3. Use **Add** to install the `.appx` and the dependency in `Dependencies`.
+   If Dev Home lists it as an App, change its type to **Game**.
+4. Copy your dump — the folder containing `eboot.bin`, `sce_module`, `sce_sys`
+   and `dvdroot_ps4` — to USB or `D:\DevelopmentFiles` on the console. Automatic
+   discovery checks `\dumps\GodOfWar3` on USB and up to three levels below
+   `D:\DevelopmentFiles`; use **Choose game folder** if needed.
+5. Open **God of War III**, choose your language and run **Prepare** on first use.
+   In **Beta 0**, use **Precompile shaders** to prepare ahead of time, then
+   **Start game**, which loads the recorded shader cache.
 
-Aguarde a preparação terminar. Shaders e estados ainda desconhecidos podem
-compilar durante o jogo. **Iniciar jogo sem carregar shaders** é uma alternativa
-que pode omitir gráficos enquanto a compilação está pendente;
-para testar o primeiro boot, prefira o início normal.
+Wait for preparation to finish. Unknown shaders and states may still compile
+during gameplay. **Start game without loading shaders** is an alternative that
+may omit graphics while compilation is pending; use normal startup when testing
+the first boot.
 
-Durante o jogo, **RS + LT** abre o menu. A resolução padrão é 720p. Os controles
-avançados indicados como aplicáveis ao próximo início exigem fechar e reabrir o
-app. A identidade interna do pacote foi preservada para permitir atualização
-sobre a instalação existente e manutenção dos dados.
+During gameplay, **RS + LT** opens the menu. The default resolution is 720p.
+Advanced options marked as applying on the next start require closing and
+reopening the app. The internal package identity was preserved so updates can
+install over the existing app and retain its data.
 
-## Estado atual e problemas conhecidos
+## Current status and known issues
 
-- A Beta 0 passou pela compilação Windows/UWP, empacotamento
-  e verificação dos arquivos. Isso não substitui testes no console.
-- Há relatos de texturas/letras corrompidas no primeiro boot, ghosting e stuttering.
-  **A Beta 0 não contém as tentativas de correção da .436, e a correção visual da
-  cena relatada não está confirmada no Xbox**.
-- Não há ganho de FPS medido deste fork. Preparar shaders pode alongar o
-  carregamento, e novas compilações podem causar pausas durante o jogo.
-- Memória é limitada no Developer Mode; resoluções altas aumentam a pressão.
-  FSR e resolução dinâmica não foram habilitados como recursos funcionais no Xbox.
+- Beta 0 passed the Windows/UWP build, packaging and file-integrity checks.
+  These checks do not replace testing on a console.
+- Corrupted textures/text on first boot, ghosting and stuttering have been reported.
+  **Beta 0 does not include the attempted .436 fixes, and a visual fix for the
+  reported scene has not been confirmed on Xbox.**
+- No FPS improvement has been measured for this fork. Shader preparation can
+  increase loading time, and new compilations can cause pauses during gameplay.
+- Developer Mode has limited memory; higher resolutions increase pressure.
+  FSR and dynamic resolution have not been enabled as working Xbox features.
 
-Para relatar um problema, inclua versão do app, modelo do console, idioma,
-resolução, passos para reproduzir, imagem e `loader.log`, sem dados pessoais.
-Veja o [guia de diagnóstico e desempenho](xbox/PERFORMANCE.pt-BR.md).
+When reporting a problem, include the app version, console model, language,
+resolution, reproduction steps, a screenshot and `loader.log`, without personal
+data. See the [performance and diagnostic guide](xbox/PERFORMANCE.md)
+([Brazilian Portuguese](xbox/PERFORMANCE.pt-BR.md)).
 
-## Licença e reconhecimento
+## License and acknowledgements
 
-Mantemos a licença [GPL-2.0](LICENSE) e os avisos dos componentes de terceiros.
-Os créditos não se limitam aos mantenedores deste fork: leia a
-[relação completa de autores e licenças](xbox/CREDITS.md).
+We retain the [GPL-2.0 license](LICENSE) and third-party notices. Credits extend
+beyond this fork's maintainers: read the [full author and license list](xbox/CREDITS.md).

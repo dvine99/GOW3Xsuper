@@ -1,5 +1,7 @@
 # Desempenho no Xbox — controles e diagnóstico do GOW3Xsuper
 
+[English version](PERFORMANCE.md)
+
 **Distribuição atual: Beta 0 (1.0.26300.308).** A Release .436 foi excluída.
 As seções sobre preparação do primeiro início na .436 são histórico de um
 experimento retirado e não descrevem o binário Beta 0. Veja o

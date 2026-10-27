@@ -23,7 +23,8 @@ See [our releases](../RELEASES.md), [maintained changes](../MODIFICATIONS.md) an
 [version history](../CHANGELOG.md).
 
 Performance controls and profiling for the Alpha 6-based changes are documented in
-[Desempenho no Xbox (Português)](PERFORMANCE.pt-BR.md).
+[Xbox performance guide](PERFORMANCE.md)
+([Brazilian Portuguese](PERFORMANCE.pt-BR.md)).
 
 ## Reading the development log
 

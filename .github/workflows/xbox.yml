@@ -214,19 +214,19 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           $source = "https://github.com/$env:GITHUB_REPOSITORY/blob/$env:GITHUB_SHA"
           $notes = @"
-          **God of War III — GOW3Xsuper**: port experimental para **Xbox Series X|S em Developer Mode**. Não funciona no Xbox One e não inclui arquivos do jogo; requer seu próprio dump de God of War III Remastered (referência: CUSA01715).
+          **God of War III — GOW3Xsuper**: an experimental port for **Xbox Series X|S in Developer Mode**. Xbox One is not supported. No game files are included; you need your own God of War III Remastered dump (reference: CUSA01715).
 
-          **Origem e créditos**: este fork é mantido por dvine99 e deriva de [gow3_xbox, de Devran Cosmo Uenal](https://github.com/Cosmo/gow3_xbox), por sua vez derivado de [SpartanPort, de Felipe Prado e colaboradores](https://github.com/FelipePrado0/SpartanPort). [Créditos completos]($source/xbox/CREDITS.md) · [Modificações mantidas]($source/MODIFICATIONS.md) · [Histórico]($source/CHANGELOG.md).
+          **Origins and credits**: maintained by dvine99, this fork derives from [gow3_xbox by Devran Cosmo Uenal](https://github.com/Cosmo/gow3_xbox), itself derived from [SpartanPort by Felipe Prado and contributors](https://github.com/FelipePrado0/SpartanPort). [Full credits]($source/xbox/CREDITS.md) · [Maintained modifications]($source/MODIFICATIONS.md) · [Changelog]($source/CHANGELOG.md).
 
-          **Instalação**
-          1. Extraia o ZIP no PC.
-          2. Device Portal → **Add** → o arquivo ``.appx`` e a dependência em ``Dependencies``. No Dev Home, defina o tipo como **Game**.
-          3. Copie seu dump para USB ou para ``D:\DevelopmentFiles``. Se necessário, use **Escolher pasta do jogo**.
-          4. Abra **God of War III**, escolha o idioma, execute **Preparar**, **Pré-compilar shaders** e **Iniciar jogo**. Aguarde a preparação. O início normal tenta preparar uma biblioteca ausente ou incompatível e aguarda compilações necessárias; novos estados ainda podem causar pausas.
+          **Installation**
+          1. Extract the ZIP on your PC.
+          2. Device Portal → **Add** → the ``.appx`` and the dependency in ``Dependencies``. Set its type to **Game** in Dev Home.
+          3. Copy your dump to USB or ``D:\DevelopmentFiles``. Use **Choose game folder** if needed.
+          4. Open **God of War III**, choose a language and run **Prepare**, **Precompile shaders** and **Start game**. Wait for preparation. Normal startup attempts to prepare a missing/incompatible library and waits for required compilation; new states may still cause pauses.
 
-          **RS + LT** abre o menu durante o jogo. O início rápido pode omitir gráficos enquanto shaders compilam; prefira o início normal para testar o primeiro boot.
+          **RS + LT** opens the in-game menu. Fast startup may omit graphics while shaders compile; use normal startup when testing the first boot.
 
-          Atualiza a instalação existente mantendo a identidade do pacote. Build e assinatura não comprovam correção visual ou ganho de FPS no console. Não é um lançamento oficial da Sony ou Santa Monica Studio. [Guia e limitações]($source/README.md).
+          Retains the package identity to update an existing installation. A successful build and signing do not establish visual correctness or an FPS improvement on console. This is not an official Sony or Santa Monica Studio release. [Guide and limitations]($source/README.md).
           "@
           $whats_new = "$env:WHATS_NEW".Trim()
           if ($whats_new -and -not $whats_new.Contains("`n")) {

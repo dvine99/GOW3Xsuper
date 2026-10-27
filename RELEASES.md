@@ -1,52 +1,53 @@
-# Releases do GOW3Xsuper
+# GOW3Xsuper Releases
 
-**[Abrir Releases e baixar as versões deste fork](https://github.com/dvine99/GOW3Xsuper/releases)**
+**[Open Releases and download this fork's builds](https://github.com/dvine99/GOW3Xsuper/releases)**
 
-| Versão | Tag | Uso |
+| Version | Tag | Purpose |
 | --- | --- | --- |
-| **Beta 0 — 1.0.26300.308** | [alpha-1.0.26300.0308](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0308) | Versão publicada atual; pacote original da .308. |
+| **Beta 0 — 1.0.26300.308** | [alpha-1.0.26300.0308](https://github.com/dvine99/GOW3Xsuper/releases/tag/alpha-1.0.26300.0308) | Current published release; original .308 package. |
 
-As versões .343 e .436 foram retiradas; a Release da .436 e seus anexos foram
-excluídos. O histórico técnico permanece no Git e no relatório. Leia o
-[histórico](CHANGELOG.md) antes de trocar de versão.
+Versions .343 and .436 were withdrawn; the .436 release and its attachments
+were deleted. The technical history remains in Git and in the report. Read the
+[changelog](CHANGELOG.md) before switching versions.
 
-## Conteúdo dos downloads
+## Download contents
 
-- `GOW3xbox<versão>.zip`: aplicativo `.appx` e dependência VCLibs em `Dependencies`.
-- Arquivo `.sha256` para conferir o ZIP da Beta 0.
-- Não inclui dump, executável ou assets do jogo; o código-fonte é o da tag indicada.
-- Pacote assinado com a chave pública de teste do projeto, para Developer Mode;
-  não é um lançamento da Microsoft Store.
+- `GOW3xbox<version>.zip`: the `.appx` application and VCLibs dependency in `Dependencies`.
+- A `.sha256` file to verify the Beta 0 ZIP.
+- No game dump, game executable or game assets; source code corresponds to the specified tag.
+- A package signed with the project's public test key for Developer Mode;
+  this is not a Microsoft Store release.
 
-No PowerShell, use `Get-FileHash .\GOW3xbox<versão>.zip -Algorithm SHA256` e compare
-com o arquivo `.sha256`. Instalação e requisitos estão no [README](README.md).
+In PowerShell, run `Get-FileHash .\GOW3xbox<version>.zip -Algorithm SHA256` and
+compare the result with the `.sha256` file. See the [README](README.md) for
+installation and requirements.
 
-## Publicar as próximas versões
+## Publishing future versions
 
-Para mantenedores com permissão no repositório:
+For maintainers with repository permissions:
 
-1. Abra **Actions → Xbox build → Run workflow** e selecione a revisão desejada.
-   O workflow deve estar incorporado ao branch padrão para aparecer no disparo
-   manual; enquanto isso, os pushes ao branch de trabalho configurado geram artifacts.
-2. Ative a opção de publicação de prerelease (`release`), preencha título e
-   mudanças (`whats_new`, itens separados por `|`) e execute.
-3. O workflow compila, testa, indexa recursos, empacota e assina. Se houver falha,
-   corrija antes de publicar. A etapa de release anexa o ZIP aprovado.
-4. Confira tag, commit, versão do manifesto e download. Registre as mudanças no
-   [CHANGELOG](CHANGELOG.md) e atualize a tabela de versões do README.
-5. Documente o resultado do teste no Xbox separadamente da build. Não anuncie
-   correção visual ou ganho de FPS sem evidência do console.
+1. Open **Actions → Xbox build → Run workflow** and select the desired revision.
+   The workflow must be merged into the default branch to appear for manual
+   dispatch; until then, pushes to the configured work branch produce artifacts.
+2. Enable prerelease publication (`release`), enter a title and changes
+   (`whats_new`, with items separated by `|`), and run it.
+3. The workflow builds, tests, indexes resources, packages and signs the app.
+   Resolve any failures before publishing. The release step attaches the approved ZIP.
+4. Check the tag, commit, manifest version and download. Record changes in the
+   [CHANGELOG](CHANGELOG.md) and update the README's version table.
+5. Document Xbox test results separately from build results. Do not announce
+   visual fixes or FPS improvements without evidence from the console.
 
-O ZIP usa a versão real do app. A tag completa o último componente com zeros
-para ordenação (`308` → `0308`); o manifesto e o ZIP continuam com `308`.
-**Beta 0** é o nome público da Release; a tag técnica existente foi preservada.
-Não sobrescreva uma versão já publicada com outro binário. Identifique versões
-problemáticas como retiradas e publique uma versão nova com a correção.
+The ZIP uses the actual app version. The tag pads its final component with zeros
+for ordering (`308` → `0308`); the manifest and ZIP retain `308`.
+**Beta 0** is the public release name; its existing technical tag was preserved.
+Do not replace a published version with a different binary. Mark problematic
+versions as withdrawn and publish fixes as a new version.
 
-## Origem e créditos de cada release
+## Origins and credits in each release
 
-As notas devem identificar **GOW3Xsuper → gow3_xbox (Devran Cosmo Uenal) →
-SpartanPort (Felipe Prado e colaboradores)**, linkar os créditos completos,
-descrever as mudanças próprias, limitações e passos de instalação.
-A Beta 0 usa exatamente o ZIP do build aprovado da .308 indicado no histórico;
-a troca de nome não modifica o aplicativo nem constitui uma nova compilação.
+Notes should identify **GOW3Xsuper → gow3_xbox (Devran Cosmo Uenal) → SpartanPort
+(Felipe Prado and contributors)**, link the full credits and describe downstream
+changes, limitations and installation steps. Beta 0 uses the exact ZIP from the
+successful .308 build listed in the changelog; renaming it does not modify the
+app or constitute a new build.
