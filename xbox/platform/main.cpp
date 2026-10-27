@@ -537,6 +537,12 @@ static void loader() {
     if(driver_stream!=INVALID_HANDLE_VALUE) SetStdHandle(STD_ERROR_HANDLE,driver_stream);
     setvbuf(stdout,nullptr,_IONBF,0); setvbuf(stderr,nullptr,_IONBF,0);
     std::printf("GOW3 UWP loader milestone 1\n");
+    // Record the installed name/version after stdout is redirected to loader.log.
+    const auto package = winrt::Windows::ApplicationModel::Package::Current();
+    const auto version = package.Id().Version();
+    std::printf("UWP package display name: %s; version: %u.%u.%u.%u\n",
+        winrt::to_string(package.DisplayName()).c_str(), unsigned(version.Major),
+        unsigned(version.Minor), unsigned(version.Build), unsigned(version.Revision));
     if(memory_limit_override) std::printf("UWP memory: debug budget %llu MiB (OS limit unchanged)\n",gow3_uwp_app_memory_limit()>>20);
     GAMING_DEVICE_MODEL_INFORMATION model{};
     GetGamingDeviceModelInformation(&model);
@@ -786,9 +792,6 @@ struct View : winrt::implements<View,winrt::Windows::ApplicationModel::Core::IFr
         });
     }
     void SetWindow(winrt::Windows::UI::Core::CoreWindow const& value) {
-        // Use the manifest display name; setting a document Title can append it twice.
-        std::printf("UWP package display name: %s\n",
-            winrt::to_string(winrt::Windows::ApplicationModel::Package::Current().DisplayName()).c_str());
         window=value; window.Closed([](auto const&,auto const&) {
             if(!finished.load()) { std::puts("UWP lifecycle: window closed"); std::fflush(stdout); }
             window_closed=true;
