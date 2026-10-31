@@ -14,6 +14,11 @@
 #include "video_core/renderer_vulkan/vk_instance.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
 #include "video_core/renderer_vulkan/vk_staging_buffer_pool.h"
+#ifdef GOW3_UWP
+#include "video_core/renderer_vulkan/uwp_staging_policy.h"
+extern "C" uint64_t gow3_uwp_app_memory_usage();
+extern "C" uint64_t gow3_uwp_app_memory_limit();
+#endif
 
 namespace Vulkan {
 
@@ -24,12 +29,11 @@ namespace {
 // spartanport: staging memory is populated (allocated and cleared) by the kernel on first CPU access,
 // ~2 ms per 16 MiB block. Streaming bursts a few seconds apart re-created the blocks trimmed
 // in between and copies into them ran at 0.3 GB/s (stutter). Blocks now live 30 s idle, the
-// upload ring keeps SPARTAN_STAGING_KEEP_MB (512) and is populated at startup.
+// upload ring retains idle blocks and is populated at startup.
 #ifdef GOW3_UWP
-constexpr u64 RING_IDLE_FRAMES = 120;
 constexpr u64 LARGE_IDLE_FRAMES = 120;
 constexpr u64 PREWARM_BLOCKS = 2;
-constexpr u64 DEFAULT_KEEP_MB = 64;
+constexpr u64 DEFAULT_KEEP_MB = 128;
 #else
 constexpr u64 RING_IDLE_FRAMES = 3000;
 constexpr u64 LARGE_IDLE_FRAMES = 3000;
@@ -169,8 +173,16 @@ void StagingBufferPool::FreeDeferred(const StagingBufferRef& ref) {
 
 void StagingBufferPool::TickFrame() {
     ++frame;
+#ifdef GOW3_UWP
+    const auto policy = SelectUwpStagingPolicy(gow3_uwp_app_memory_usage(),
+                                               gow3_uwp_app_memory_limit(), keep_blocks);
+#endif
     for (Ring& ring : rings) {
-        TrimRing(ring);
+#ifdef GOW3_UWP
+        TrimRing(ring, policy.keep_blocks, policy.idle_frames);
+#else
+        TrimRing(ring, keep_blocks, RING_IDLE_FRAMES);
+#endif
     }
     for (auto& cache : large_caches) {
         TrimLarge(cache);
@@ -178,11 +190,11 @@ void StagingBufferPool::TickFrame() {
     PublishStats();
 }
 
-void StagingBufferPool::TrimRing(Ring& ring) {
+void StagingBufferPool::TrimRing(Ring& ring, u64 retained_blocks, u64 idle_frames) {
     auto& blocks = ring.blocks;
     for (size_t i = blocks.size(); i-- > 0;) {
         const Block& block = blocks[i];
-        if (blocks.size() <= keep_blocks || frame - block.last_used_frame < RING_IDLE_FRAMES ||
+        if (blocks.size() <= retained_blocks || frame - block.last_used_frame < idle_frames ||
             !scheduler.IsFree(block.buffer->LastTick())) {
             continue;
         }

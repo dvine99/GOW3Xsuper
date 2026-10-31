@@ -10,6 +10,11 @@ on:
         description: Publish the package as a pre-release (otherwise it is only a download of this run)
         type: boolean
         default: true
+      channel:
+        description: Release channel
+        type: choice
+        options: [alpha, beta-01]
+        default: alpha
       title:
         description: "The release's title (empty: God of War 3 Launcher <version>)"
         type: string
@@ -176,11 +181,12 @@ jobs:
           # The inputs reach the script as variables, never as its text.
           TITLE: ${{ inputs.title }}
           WHATS_NEW: ${{ inputs.whats_new }}
+          CHANNEL: ${{ inputs.channel }}
         run: |
           $PSNativeCommandUseErrorActionPreference = $true
           $source = "https://github.com/$env:GITHUB_REPOSITORY/blob/$env:GITHUB_SHA"
           $notes = @"
-          Alpha for the **Xbox Series X|S** in Developer Mode (not the Xbox One). It contains no game files: you need your own dump of God of War III Remastered (tested: CUSA01715).
+          $env:CHANNEL for the **Xbox Series X|S** in Developer Mode (not the Xbox One). It contains no game files: you need your own dump of God of War III Remastered (tested: CUSA01715).
 
           **Install**
           1. Unzip on a PC.
@@ -205,4 +211,4 @@ jobs:
           # text, and 819 would sort after 2341. The package version itself cannot have leading zeros.
           $parts = "$env:VERSION".Split('.')
           $parts[3] = $parts[3].PadLeft(4, '0')
-          gh release create "alpha-$($parts -join '.')" $env:ZIP --target $env:GITHUB_SHA --prerelease --title $title --notes-file "$env:RUNNER_TEMP\notes.md"
+          gh release create "$env:CHANNEL-$($parts -join '.')" $env:ZIP --target $env:GITHUB_SHA --prerelease --title $title --notes-file "$env:RUNNER_TEMP\notes.md"

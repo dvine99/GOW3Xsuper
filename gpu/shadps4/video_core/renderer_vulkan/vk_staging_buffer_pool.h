@@ -73,7 +73,7 @@ private:
                                      VideoCore::MemoryType type);
     StagingBufferRef RequestLarge(u64 size, VideoCore::MemoryType type, bool deferred);
 
-    void TrimRing(Ring& ring);
+    void TrimRing(Ring& ring, u64 retained_blocks, u64 idle_frames);
     void TrimLarge(std::vector<LargeBuffer>& cache);
 
     void PublishStats() const;
